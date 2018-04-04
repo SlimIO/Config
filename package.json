@@ -1,0 +1,38 @@
+{
+  "name": "@slimio/config",
+  "version": "0.0.0",
+  "description": "SlimIO Reactive JSON Config loaded",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx ava --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SlimIO/Config.git"
+  },
+  "keywords": [
+    "SlimIO",
+    "Config",
+    "JSON",
+    "Loader"
+  ],
+  "author": "SlimIO",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SlimIO/Config/issues"
+  },
+  "homepage": "https://github.com/SlimIO/Config#readme",
+  "devDependencies": {
+    "@escommunity/minami": "^1.0.0",
+    "@slimio/eslint-config": "^1.0.0",
+    "ava": "^0.25.0",
+    "nyc": "^11.6.0"
+  },
+  "dependencies": {
+    "@sindresorhus/is": "^0.8.0",
+    "ajv": "^6.4.0",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
+    "zen-observable": "^0.8.8"
+  }
+}
