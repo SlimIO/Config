@@ -24,7 +24,7 @@
   "homepage": "https://github.com/SlimIO/Config#readme",
   "devDependencies": {
     "@escommunity/minami": "^1.0.0",
-    "@slimio/eslint-config": "^1.0.0",
+    "@slimio/eslint-config": "^1.0.1",
     "ava": "^0.25.0",
     "nyc": "^11.6.0"
   },
