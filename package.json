@@ -31,6 +31,7 @@
   "dependencies": {
     "@sindresorhus/is": "^0.8.0",
     "ajv": "^6.4.0",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "zen-observable": "^0.8.8"
