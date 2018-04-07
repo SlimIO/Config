@@ -4,6 +4,7 @@
   "description": "SlimIO Reactive JSON Config loaded",
   "main": "index.js",
   "scripts": {
+    "doc": "npx jsdoc -c ./jsdoc.json -r",
     "test": "npx ava --verbose"
   },
   "repository": {
