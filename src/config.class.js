@@ -6,18 +6,20 @@ const {
     access,
     readFile,
     writeFile,
-    watchFile,
-    unwatchFile,
     constants: { R_OK, W_OK }
 } = require("fs");
 
 // Require third-party NPM package(s)
+const watcher = require("node-watch");
 const is = require("@sindresorhus/is");
 const ajv = new (require("ajv"))({ useDefaults: "shared" });
 const get = require("lodash.get");
 const clonedeep = require("lodash.clonedeep");
 const set = require("lodash.set");
 const Observable = require("zen-observable");
+
+// Require internal dependencie(s)
+const { formatAjvErrors } = require("./utils");
 
 // FS Async Wrapper
 const FSAsync = {
@@ -26,23 +28,9 @@ const FSAsync = {
     writeFile: promisify(writeFile)
 };
 
-/**
- * @function formatAjvErrors
- * @desc format ajv errors
- * @param {!Array} ajvErrors Array of errors
- * @returns {String}
- */
-function formatAjvErrors(ajvErrors) {
-    if (ajvErrors instanceof Array === false) {
-        return "";
-    }
-    const stdout = [];
-    for (const objectErr of ajvErrors) {
-        stdout.push(`Configuration ${objectErr.message}\n`);
-    }
-
-    return stdout.join("");
-}
+// Private Config Accessors
+const payload = Symbol();
+const schema = Symbol();
 
 /**
  * @class Config
@@ -51,12 +39,13 @@ function formatAjvErrors(ajvErrors) {
  * @property {String} configFile Path to the configuration file
  * @property {String} schemaFile Path to the schema configuration file
  * @property {Object} payload Configuration content
- * @property {Boolean} createOnStart
+ * @property {Boolean} createOnNoEntry
  * @property {Boolean} autoReload
  * @property {Boolean} writeOnSet
  * @property {Boolean} configHasBeenRead Know if the configuration has been read at least one time
  * @property {Boolean} autoReloadActivated Know if the autoReload is Enabled or Disabled
- * @property {Map<String, Observable>} observables Map of observables
+ * @property {Array} subscriptionObservers
+ * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
  */
 class Config extends Events {
 
@@ -64,11 +53,13 @@ class Config extends Events {
      * @constructor
      * @param {!String} configFilePath Absolute path to the configuration file
      * @param {Object=} [options={}] Config options
-     * @param {Boolean=} [options.createOnStart=false] Create the configuration file on start
+     * @param {Boolean=} [options.createOnNoEntry=false] Create the configuration file when no entry are detected
      * @param {Boolean=} [options.autoReload=false] Enable/Disable hot reload of the configuration file.
      * @param {Boolean=} [options.writeOnSet=false] Write configuration on the disk after a set action
+     * @param {Number=} [options.reloadDelay=1000] Hot reload delay
      *
      * @throws {TypeError}
+     * @throws {Error}
      */
     constructor(configFilePath, options = {}) {
         super();
@@ -87,14 +78,15 @@ class Config extends Events {
             `${dir}/${name}.schema${ext}`;
 
         // Assign default class values
-        this._payload = null;
-        this._schema = null;
-        this.createOnStart = options.createOnStart || false;
+        this[payload] = null;
+        this[schema] = null;
+        this.createOnNoEntry = options.createOnNoEntry || false;
         this.autoReload = options.autoReload || false;
         this.autoReloadActivated = false;
+        this.reloadDelay = options.reloadDelay || 1000;
         this.writeOnSet = options.writeOnSet || false;
         this.configHasBeenRead = false;
-        this.observables = new Map();
+        this.subscriptionObservers = [];
     }
 
     /**
@@ -107,7 +99,7 @@ class Config extends Events {
             return null;
         }
 
-        return clonedeep(this._payload);
+        return clonedeep(this[payload]);
     }
 
     /**
@@ -115,14 +107,32 @@ class Config extends Events {
      * @memberof Config#
      * @member {Object} payload
      * @param {!Object} newPayload Newest payload to setup
+     *
+     * @throws {Error}
+     * @throws {TypeError}
      */
     set payload(newPayload) {
+        if (!this.configHasBeenRead) {
+            throw new Error(
+                "Config.payload - cannot set a new payload when the config has not been read yet!"
+            );
+        }
         if (is(newPayload) !== "Object") {
-            throw new TypeError("Config#set.payload->newPayload should be typeof <Object>");
+            throw new TypeError("Config.payload->newPayload should be typeof <Object>");
         }
 
-        // TODO: Detect update(s) ?
-        this._payload = clonedeep(newPayload);
+        const tempPayload = clonedeep(newPayload);
+        if (this[schema](tempPayload) === false) {
+            const errors = formatAjvErrors(this[schema].errors);
+            const msg = `Config.payload - Failed to validate new configuration, err => ${errors}`;
+            this.emit("error", msg);
+            throw new Error(msg);
+        }
+
+        this[payload] = tempPayload;
+        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
+            subscriptionObservers.next(this.get(fieldPath));
+        }
     }
 
     /**
@@ -133,8 +143,6 @@ class Config extends Events {
      * @memberof Config#
      * @param {Object=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
      * @return {Promise<void>}
-     *
-     * @throws {Error}
      */
     async read(defaultPayload) {
         // Declare scoped variable(s) to the top
@@ -150,12 +158,12 @@ class Config extends Events {
             );
         }
         catch (err) {
-            if (!this.createOnStart || err.code !== "ENOENT") {
+            if (!this.createOnNoEntry || err.code !== "ENOENT") {
                 throw err;
             }
             JSONConfig = is(defaultPayload) === "Object" ?
                 defaultPayload :
-                is.nullOrUndefined(this._payload) ? {} : this.payload;
+                is.nullOrUndefined(this[payload]) ? {} : this.payload;
             await FSAsync.writeFile(this.configFile, JSON.stringify(JSONConfig, null, 4));
         }
 
@@ -171,23 +179,12 @@ class Config extends Events {
             if (err.code !== "ENOENT") {
                 throw err;
             }
-            JSONSchema = {};
+            JSONSchema = Config.DEFAULTSchema;
         }
 
-        // Verify that the Configuration match the JSON Schema.
-        const schema = ajv.compile(JSONSchema);
-        const schemaIsValid = schema(JSONConfig);
-        if (schemaIsValid === false) {
-            console.error(schema.errors);
-
-            // TODO: Add error(s) granularity
-            this.emit("error", "Config.read - Failed to validate configuration schema");
-            throw new Error("Config.read - Failed to validate configuration schema");
-        }
-
-        this._schema = schema;
-        this.payload = JSONConfig;
+        this[schema] = ajv.compile(JSONSchema);
         this.configHasBeenRead = true;
+        this.payload = JSONConfig;
         if (this.autoReload) {
             this.setupAutoReload();
         }
@@ -205,9 +202,8 @@ class Config extends Events {
             return;
         }
         this.autoReloadActivated = true;
-        watchFile(this.configFile, async(curr, prev) => {
-            console.log(`the current mtime is: ${curr.mtime}`);
-            console.log(`the previous mtime was: ${prev.mtime}`);
+        this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, async(evt, name) => {
+            console.log("%s changed.", name);
             await this.read();
             this.emit("reload");
         });
@@ -240,6 +236,23 @@ class Config extends Events {
 
     /**
      * @public
+     * @method observeKey
+     * @desc Observe a given configuration key with an Observable object!
+     * @param {!String} fieldPath Path to the field (separated with dot)
+     * @memberof Config#
+     * @return {Observable}
+     */
+    observeKey(fieldPath) {
+        const fieldValue = this.get(fieldPath);
+
+        return new Observable((observer) => {
+            observer.next(fieldValue);
+            this.subscriptionObservers.push([fieldPath, observer]);
+        });
+    }
+
+    /**
+     * @public
      * @template T
      * @method get
      * @desc Get a given field of the configuration
@@ -261,20 +274,7 @@ class Config extends Events {
             throw new TypeError("Config.get->fieldPath should be typeof <string>");
         }
 
-        // Verify that the modification is okay!
-        const tempPayload = set(this.payload, fieldPath, fieldValue);
-        if (this._schema(tempPayload) === false) {
-            console.error(this._schema.errors);
-
-            // TODO: Add error(s) granularity
-            const errors = formatAjvErrors(this._schema.errors);
-            throw new Error(`Config.set - Failed to set new value for key <${fieldPath}>`);
-        }
-
-        // Apply new payload
-        this.payload = tempPayload;
-
-        // Write Configuration on Disk
+        this.payload = set(this.payload, fieldPath, fieldValue);
         if (this.writeOnSet) {
             process.nextTick(this.writeOnDisk.bind(this));
         }
@@ -286,18 +286,22 @@ class Config extends Events {
      * @desc Write the configuration on the Disk
      * @memberof Config#
      * @returns {Promise<void>}
+     *
+     * @throws {Error}
      */
     async writeOnDisk() {
         if (!this.configHasBeenRead) {
             throw new Error("Config.writeOnDisk - Cannot write unreaded configuration on the disk");
         }
-        if (this._schema(this._payload) === false) {
-            // TODO: What do we do in this case ?
-            throw new Error("Config.writeOnDisk - Cannot write on the disk unValid configuration");
+        if (this[schema](this[payload]) === false) {
+            const errors = formatAjvErrors(this[schema].errors);
+            throw new Error(
+                `Config.writeOnDisk - Cannot write on the disk invalid config, err => ${errors}`
+            );
         }
 
         await FSAsync.access(this.configFile, W_OK);
-        await FSAsync.writeFile(this.configFile, JSON.stringify(this._payload, null, 4));
+        await FSAsync.writeFile(this.configFile, JSON.stringify(this[payload], null, 4));
     }
 
     /**
@@ -308,9 +312,13 @@ class Config extends Events {
      * @returns {Promise<void>}
      */
     async close() {
+        if (this.autoReloadActivated && !this.watcher.isClosed()) {
+            this.watcher.close();
+            this.autoReloadActivated = false;
+        }
         await this.writeOnDisk();
-        if (this.autoReloadActivated) {
-            unwatchFile(this.configFile);
+        for (const [, subscriptionObservers] of this.subscriptionObservers) {
+            subscriptionObservers.complete();
         }
         this.configHasBeenRead = false;
     }

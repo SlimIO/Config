@@ -1,14 +1,24 @@
 const Config = require("./src/config.class");
+const { writeFile } = require("fs");
+const { promisify } = require("util");
+const writeFileAsync = promisify(writeFile);
 
 async function main() {
     const cfg = new Config("./tests/config.json", {
-        createOnStart: true,
-        autoReload: true
+        autoReload: true,
+        reloadDelay: 200
     });
     await cfg.read();
-    console.log(cfg.payload);
-    cfg.set("foo.mdr", "mdr");
-    console.log(cfg.payload);
-    await cfg.close();
+    cfg.observeKey("foo").subscribe(
+        (keyValue) => console.log(`foo curr value => ${keyValue}`),
+        console.error,
+        () => console.log("completed!")
+    );
+    await writeFileAsync("./tests/config.json", JSON.stringify({
+        foo: "world!"
+    }, null, 4));
+    setTimeout(() => {
+        cfg.close();
+    }, 1000);
 }
 main().catch(console.error);
