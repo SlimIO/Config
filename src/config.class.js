@@ -125,7 +125,6 @@ class Config extends Events {
         if (this[schema](tempPayload) === false) {
             const errors = formatAjvErrors(this[schema].errors);
             const msg = `Config.payload - Failed to validate new configuration, err => ${errors}`;
-            this.emit("error", msg);
             throw new Error(msg);
         }
 
@@ -236,13 +235,13 @@ class Config extends Events {
 
     /**
      * @public
-     * @method observeKey
+     * @method observableOf
      * @desc Observe a given configuration key with an Observable object!
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @memberof Config#
      * @return {Observable}
      */
-    observeKey(fieldPath) {
+    observableOf(fieldPath) {
         const fieldValue = this.get(fieldPath);
 
         return new Observable((observer) => {

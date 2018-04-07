@@ -18,7 +18,8 @@ function formatAjvErrors(ajvErrors) {
     }
     const stdout = [];
     for (const oErr of ajvErrors) {
-        stdout.push(`Configuration ${oErr.message}\n`);
+        // console.error(oErr);
+        stdout.push(`property ${oErr.dataPath} ${oErr.message}\n`);
     }
 
     return stdout.join("");
