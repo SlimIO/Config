@@ -7,7 +7,9 @@
     },
     "source": {
         "include": [
-			"index.js"
+            "index.js",
+            "src/config.class.js",
+            "src/utils.js"
         ],
         "exclude": [
             "node_modules",
