@@ -1,9 +1,10 @@
+/// <reference types="node" />
 /// <reference types="zen-obserables" />
 
 /**
  * Config class definition
  */
-declare class Config<T> {
+declare class Config<T> extends event {
     // Constructor
     constructor(configFilePath: string, options?: Config.ConstructorOptions);
 
