@@ -19,6 +19,7 @@ declare class Config<T> extends event {
     public configHasBeenRead: boolean;
     public subscriptionObservers: Array<Array<string, ZenObservable.SubscriptionObserver<any>>>;
     public payload: T;
+    public defaultSchema: object;
 
     // Static properties
     static DEFAULTSchema: object;
@@ -44,6 +45,7 @@ declare namespace Config {
         writeOnSet?: boolean;
         autoReload?: boolean;
         reloadDelay?: number;
+        defaultSchema?: object;
     }
 
 }

@@ -47,6 +47,7 @@ const schema = Symbol();
  * @property {Boolean} autoReloadActivated Know if the autoReload is Enabled or Disabled
  * @property {Array} subscriptionObservers
  * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
+ * @property {Object} defaultSchema
  */
 class Config extends Events {
 
@@ -57,6 +58,7 @@ class Config extends Events {
      * @param {Boolean=} [options.createOnNoEntry=false] Create the configuration file when no entry are detected
      * @param {Boolean=} [options.autoReload=false] Enable/Disable hot reload of the configuration file.
      * @param {Boolean=} [options.writeOnSet=false] Write configuration on the disk after a set action
+     * @param {Object=} options.defaultSchema Optional default Schema
      * @param {Number=} [options.reloadDelay=1000] Hot reload delay
      *
      * @throws {TypeError}
@@ -88,6 +90,11 @@ class Config extends Events {
         this.writeOnSet = options.writeOnSet || false;
         this.configHasBeenRead = false;
         this.subscriptionObservers = [];
+
+        // Assign defaultSchema is exist!
+        if (Reflect.has(options.defaultSchema)) {
+            this.defaultSchema = options.defaultSchema;
+        }
     }
 
     /**
@@ -179,7 +186,9 @@ class Config extends Events {
             if (err.code !== "ENOENT") {
                 throw err;
             }
-            JSONSchema = Config.DEFAULTSchema;
+            JSONSchema = is.nullOrUndefined(this.defaultSchema) ?
+                Config.DEFAULTSchema :
+                this.defaultSchema;
         }
 
         this[schema] = ajv.compile(JSONSchema);
