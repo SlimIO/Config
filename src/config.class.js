@@ -35,10 +35,11 @@ const schema = Symbol();
 /**
  * @class Config
  * @classdesc Reactive JSON Config loader class
+ * @template T
  *
  * @property {String} configFile Path to the configuration file
  * @property {String} schemaFile Path to the schema configuration file
- * @property {Object} payload Configuration content
+ * @property {T} payload Configuration content
  * @property {Boolean} createOnNoEntry
  * @property {Boolean} autoReload
  * @property {Boolean} writeOnSet
@@ -46,16 +47,18 @@ const schema = Symbol();
  * @property {Boolean} autoReloadActivated Know if the autoReload is Enabled or Disabled
  * @property {Array} subscriptionObservers
  * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
+ * @property {Object} defaultSchema
  */
 class Config extends Events {
 
     /**
      * @constructor
      * @param {!String} configFilePath Absolute path to the configuration file
-     * @param {Object=} [options={}] Config options
+     * @param {Object} [options={}] Config options
      * @param {Boolean=} [options.createOnNoEntry=false] Create the configuration file when no entry are detected
      * @param {Boolean=} [options.autoReload=false] Enable/Disable hot reload of the configuration file.
      * @param {Boolean=} [options.writeOnSet=false] Write configuration on the disk after a set action
+     * @param {Object=} options.defaultSchema Optional default Schema
      * @param {Number=} [options.reloadDelay=1000] Hot reload delay
      *
      * @throws {TypeError}
@@ -87,6 +90,11 @@ class Config extends Events {
         this.writeOnSet = options.writeOnSet || false;
         this.configHasBeenRead = false;
         this.subscriptionObservers = [];
+
+        // Assign defaultSchema is exist!
+        if (Reflect.has(options.defaultSchema)) {
+            this.defaultSchema = options.defaultSchema;
+        }
     }
 
     /**
@@ -140,8 +148,8 @@ class Config extends Events {
      * @method read
      * @desc Read the configuration file
      * @memberof Config#
-     * @param {Object=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
-     * @return {Promise<void>}
+     * @param {T=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
+     * @return {Promise<this>}
      */
     async read(defaultPayload) {
         // Declare scoped variable(s) to the top
@@ -178,7 +186,9 @@ class Config extends Events {
             if (err.code !== "ENOENT") {
                 throw err;
             }
-            JSONSchema = Config.DEFAULTSchema;
+            JSONSchema = is.nullOrUndefined(this.defaultSchema) ?
+                Config.DEFAULTSchema :
+                this.defaultSchema;
         }
 
         this[schema] = ajv.compile(JSONSchema);
@@ -187,6 +197,8 @@ class Config extends Events {
         if (this.autoReload) {
             this.setupAutoReload();
         }
+
+        return this;
     }
 
     /**
@@ -202,7 +214,6 @@ class Config extends Events {
         }
         this.autoReloadActivated = true;
         this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, async(evt, name) => {
-            console.log("%s changed.", name);
             await this.read();
             this.emit("reload");
         });
@@ -210,12 +221,12 @@ class Config extends Events {
 
     /**
      * @public
-     * @template T
+     * @template H
      * @method get
      * @desc Get a given field of the configuration
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @memberof Config#
-     * @return {T}
+     * @return {H}
      *
      * @throws {Error}
      * @throws {TypeError}
@@ -252,12 +263,12 @@ class Config extends Events {
 
     /**
      * @public
-     * @template T
+     * @template H
      * @method get
      * @desc Get a given field of the configuration
      * @memberof Config#
      * @param {!String} fieldPath Path to the field (separated with dot)
-     * @param {!T} fieldValue Field value
+     * @param {!H} fieldValue Field value
      * @return {Promise<void>}
      *
      * @throws {Error}
