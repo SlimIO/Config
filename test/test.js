@@ -1,5 +1,7 @@
+/* eslint no-new: off */
+
 // Require Dependencies!
-const test = require("ava");
+const avaTest = require("ava");
 const is = require("@sindresorhus/is");
 const Config = require("../src/config.class");
 const { promisify } = require("util");
@@ -7,8 +9,7 @@ const {
     access,
     readFile,
     writeFile,
-    unlink,
-    constants: { R_OK, W_OK }
+    unlink
 } = require("fs");
 
 // FS Async Wrapper
@@ -20,124 +21,142 @@ const FSAsync = {
 };
 
 const configSchemaJSON = {
-    "title": "Config",
-    "type": "object",
-    "properties": {
-        "foo": {
-            "type": "string"
+    title: "Config",
+    type: "object",
+    properties: {
+        foo: {
+            type: "string"
         }
     },
-    "required": ["foo"]
+    required: ["foo"]
 };
 
 const configJSON = {
-    "foo": "world!"
+    foo: "world!"
 };
 
 let count = 0;
 
-test.after.always('guaranteed cleanup', async t => {
-    for(let i = 1; i < count+1; i++){
-        await FSAsync.unlink(`./test/config${i}.schema.json`);
-        await FSAsync.unlink(`./test/config${i}.json`);
+avaTest.after.always("Guaranteed cleanup", async() => {
+    // Promise all ?
+    for (let num = 1; num < count + 1; num++) {
+        await FSAsync.unlink(`./test/config${num}.schema.json`);
+        await FSAsync.unlink(`./test/config${num}.json`);
     }
 });
 
-async function createFiles(options){
+async function createFiles(options) {
     const num = ++count;
-    await FSAsync.writeFile(`./test/config${num}.schema.json`, JSON.stringify(configSchemaJSON, null, 4));
-    await FSAsync.writeFile(`./test/config${num}.json`, JSON.stringify(configJSON, null, 4));
+    await FSAsync.writeFile(
+        `./test/config${num}.schema.json`,
+        JSON.stringify(configSchemaJSON, null, 4)
+    );
+    await FSAsync.writeFile(
+        `./test/config${num}.json`,
+        JSON.stringify(configJSON, null, 4));
+
     return new Config(`./test/config${num}.json`, options);
 }
 
-function configTypeChecker(t, config, checkInitConfig = false){
-    t.is(is(config), "Object");
-    t.is(is(config.createOnNoEntry), "boolean");
-    t.is(is(config.autoReload), "boolean");
-    t.is(is(config.autoReloadActivated), "boolean");
-    t.is(is(config.reloadDelay), "number");
-    t.is(is(config.writeOnSet), "boolean");
-    t.is(is(config.configHasBeenRead), "boolean");
-    t.is(is(config.subscriptionObservers), "Array");
-    if(checkInitConfig){
-        t.is(config.createOnNoEntry, false);
-        t.is(config.autoReload, false);
-        t.is(config.autoReloadActivated, false);
-        t.is(config.reloadDelay, 1000);
-        t.is(config.writeOnSet, false);
-        t.is(config.configHasBeenRead, false);
-        t.deepEqual(config.subscriptionObservers, []);
+function configTypeChecker(test, config, checkInitConfig = false) {
+    test.is(is(config), "Object");
+    test.is(is(config.createOnNoEntry), "boolean");
+    test.is(is(config.autoReload), "boolean");
+    test.is(is(config.autoReloadActivated), "boolean");
+    test.is(is(config.reloadDelay), "number");
+    test.is(is(config.writeOnSet), "boolean");
+    test.is(is(config.configHasBeenRead), "boolean");
+    test.is(is(config.subscriptionObservers), "Array");
+    if (checkInitConfig) {
+        test.is(config.createOnNoEntry, false);
+        test.is(config.autoReload, false);
+        test.is(config.autoReloadActivated, false);
+        test.is(config.reloadDelay, 1000);
+        test.is(config.writeOnSet, false);
+        test.is(config.configHasBeenRead, false);
+        test.deepEqual(config.subscriptionObservers, []);
     }
 }
 
-test("Basic", async t => {
+avaTest("Basic", async(test) => {
     const config = await createFiles();
-    configTypeChecker(t, config, true);
+    configTypeChecker(test, config, true);
     await config.read();
-    t.is(is(config.payload), "Object");
-    t.is(is(config.payload.foo), "string");
-    t.is(config.payload.foo, "world!");
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
     await config.close();
 });
 
-test("AutoReload", async t => {
+avaTest("AutoReload", async(test) => {
     // Rewrite with writeFile function
     const options = {
-        autoReload : true
+        autoReload: true
     };
     const config = await createFiles(options);
-    configTypeChecker(t, config);
+    configTypeChecker(test, config);
     await config.read();
-    t.is(is(config.payload), "Object");
-    t.is(is(config.payload.foo), "string");
-    t.is(config.payload.foo, "world!");
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
 
     config.set("foo", "Hello"); 
-    t.is(is(config.payload), "Object");
-    t.is(is(config.payload.foo), "string");
-    t.is(config.payload.foo, "Hello");
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "Hello");
 
     await config.close();
 });
 
-test("Observable", async t => {
+avaTest("Observable", async(te) => {
     const config = await createFiles();
-    configTypeChecker(t, config);
+    configTypeChecker(te, config);
     await config.read();
-    t.is(is(config.payload), "Object");
-    t.is(is(config.payload.foo), "string");
-    t.is(config.payload.foo, "world!");
+    te.is(is(config.payload), "Object");
+    te.is(is(config.payload.foo), "string");
+    te.is(config.payload.foo, "world!");
 
     const obs = config.observableOf("foo");
     let subbed = false;
     await new Promise((resolve) => {
-        obs.subscribe( (curr) => {
-            if(curr === "Hello"){
+        obs.subscribe((curr) => {
+            if (curr === "Hello") {
                 subbed = true;
                 resolve();
             }
         });
         config.set("foo", "Hello");
-        t.is(is(config.payload), "Object");
-        t.is(is(config.payload.foo), "string");
-        t.is(config.payload.foo, "Hello");
+        te.is(is(config.payload), "Object");
+        te.is(is(config.payload.foo), "string");
+        te.is(config.payload.foo, "Hello");
     });
-    t.is(subbed, true);
+    te.is(subbed, true);
     
     await config.close();
 });
 
-test("Get Payload without read", async t => {
+avaTest("Get Payload without read", async(te) => {
     const config = await createFiles();
-    configTypeChecker(t, config);
+    configTypeChecker(te, config);
     const payload = config.payload;
-    t.is(payload, null);
+    te.is(payload, null);
 });
 
-test("Constructor throw error 'configFilePath should be typeof <string>'", t => {
-    const error = t.throws(() => {
-        new Config(10, options);
+avaTest("Constructor throw error 'configFilePath should be typeof <string>'", (test) => {
+    const error = test.throws(() => {
+        new Config(10);
+    }, TypeError);
+    test.is(error.message, "Config.constructor->configFilePath should be typeof <string>");
+});
+
+avaTest("Constructor throw error 'configFilePath - file extension should be .json'", (test) => {
+    const error = test.throws(() => {
+        new Config("test.txt");
     }, Error);
-    console.log(error);
-    // t.is(error);
+    test.is(error.message, "Config.constructor->configFilePath - file extension should be .json");
+});
+
+avaTest("Constructor .schema default config file", (test) => {
+    const config = new Config("./test/config.schema.json");
+    configTypeChecker(test, config);
 });
