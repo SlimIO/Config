@@ -92,7 +92,7 @@ class Config extends Events {
         this.subscriptionObservers = [];
 
         // Assign defaultSchema is exist!
-        if (Reflect.has(options.defaultSchema)) {
+        if (Reflect.has(options, "defaultSchema")) {
             this.defaultSchema = options.defaultSchema;
         }
     }
