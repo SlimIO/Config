@@ -48,6 +48,9 @@ const schema = Symbol();
  * @property {Array} subscriptionObservers
  * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
  * @property {Object} defaultSchema
+ *
+ * @author Thomas GENTILHOMME <gentilhomme.thomas@gmail.com>
+ * @version 0.1.0
  */
 class Config extends Events {
 
@@ -101,6 +104,7 @@ class Config extends Events {
      * @public
      * @memberof Config#
      * @member {Object} payload
+     * @desc Get a payload Object clone (or null if the configuration has not been read yet)
      */
     get payload() {
         if (!this.configHasBeenRead) {
@@ -115,6 +119,7 @@ class Config extends Events {
      * @memberof Config#
      * @member {Object} payload
      * @param {!Object} newPayload Newest payload to setup
+     * @desc Set a new payload Object
      *
      * @throws {Error}
      * @throws {TypeError}
@@ -146,10 +151,24 @@ class Config extends Events {
      * @public
      * @async
      * @method read
-     * @desc Read the configuration file
+     * @desc Read the configuration file (And optionaly apply a default payload value if the file doesn't exist)
      * @memberof Config#
      * @param {T=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
      * @return {Promise<this>}
+     *
+     * @example
+     * const myConfig = new Config("./path/to/config.json", {
+     *     autoReload: true,
+     *     createOnNoEntry: true
+     * });
+     *
+     * async function main() {
+     *    await myConfig.read({
+     *        foo: "bar"
+     *    });
+     *    console.log(myConfig.payload);
+     * }
+     * main().catch(console.error);
      */
     async read(defaultPayload) {
         // Declare scoped variable(s) to the top
@@ -207,6 +226,8 @@ class Config extends Events {
      * @desc Setup configuration autoReload
      * @memberof Config#
      * @return {void}
+     *
+     * @throws {Error}
      */
     setupAutoReload() {
         if (!this.configHasBeenRead) {
@@ -236,6 +257,19 @@ class Config extends Events {
      *
      * @throws {Error}
      * @throws {TypeError}
+     *
+     * @example
+     * const myConfig = new Config("./path/to/config.json", {
+     *     createOnNoEntry: true
+     * });
+     *
+     * async function main() {
+     *    await myConfig.read({
+     *        foo: "bar"
+     *    });
+     *    const value = myConfig.get("path.to.key");
+     * }
+     * main().catch(console.error);
      */
     get(fieldPath) {
         if (!this.configHasBeenRead) {
@@ -257,6 +291,32 @@ class Config extends Events {
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @memberof Config#
      * @return {Observable}
+     *
+     * @example
+     * const myConfig = new Config("./config.json", {
+     *     autoReload: true,
+     *     createOnNoEntry: true
+     * });
+     * const { writeFile } = require("fs");
+     * const { promisify } = require("util");
+     *
+     * // Promisify fs.writeFile
+     * const asyncwriteFile = promisify(writeFile);
+     *
+     * async function main() {
+     *    await myConfig.read({
+     *        foo: "bar"
+     *    });
+     *
+     *    // Observe initial and futur value(s) of foo
+     *    myConfig.observableOf("foo").subscribe(console.log);
+     *
+     *    // Re-write local config file
+     *    await asyncwriteFile("./config.json", JSON.stringify(
+     *      { foo: "world!" }, null, 4
+     *    ));
+     * }
+     * main().catch(console.error);
      */
     observableOf(fieldPath) {
         const fieldValue = this.get(fieldPath);
@@ -279,6 +339,25 @@ class Config extends Events {
      *
      * @throws {Error}
      * @throws {TypeError}
+     *
+     * @example
+     * const myConfig = new Config("./config.json", {
+     *     createOnNoEntry: true,
+     *     // writeOnSet: true
+     * });
+     *
+     * async function main() {
+     *    await myConfig.read({
+     *        foo: "bar"
+     *    });
+     *
+     *    // Set a new value for foo
+     *    myConfig.set("foo", "hello world!");
+     *
+     *    // Write on disk the configuration
+     *    await myConfig.writeOnDisk();
+     * }
+     * main().catch(console.error);
      */
     set(fieldPath, fieldValue) {
         if (!this.configHasBeenRead) {
@@ -317,7 +396,7 @@ class Config extends Events {
     /**
      * @public
      * @method close
-     * @desc Close the configuration
+     * @desc Close the configuration (it will close the watcher and all active observers).
      * @memberof Config#
      * @returns {Promise<void>}
      */
@@ -326,6 +405,7 @@ class Config extends Events {
             this.watcher.close();
             this.autoReloadActivated = false;
         }
+
         await this.writeOnDisk();
         for (const [, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.complete();
