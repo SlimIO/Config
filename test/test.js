@@ -51,11 +51,11 @@ avaTest.after.always("Guaranteed cleanup", async() => {
     toDelete.push(FSAsync.unlink("./test/basicConfig4.json"));
     toDelete.push(FSAsync.unlink("./test/defaultSchemaConfig1.json"));
     toDelete.push(FSAsync.unlink("./test/defaultSchemaConfig2.json"));
-    
+
     await Promise.all(toDelete);
 });
 
-async function createFiles(options) {
+async function createFiles(options = {}) {
     const num = ++count;
     await FSAsync.writeFile(
         `./test/config${num}.schema.json`,
@@ -63,7 +63,8 @@ async function createFiles(options) {
     );
     await FSAsync.writeFile(
         `./test/config${num}.json`,
-        JSON.stringify(configJSON, null, 4));
+        JSON.stringify(configJSON, null, 4)
+    );
 
     return {
         num,
@@ -152,7 +153,6 @@ avaTest("AutoReload by writeFile", async(test) => {
         });
         await FSAsync.writeFile(`./test/config${num}.json`, JSON.stringify(newConfigJSON, null, 4));
     });
-    console.log(config);
     await config.close();
 });
 
@@ -421,6 +421,13 @@ avaTest("Write on disk error before read", async(test) => {
     configTypeChecker(test, config);
     const error = await test.throws(config.writeOnDisk());
     test.is(error.message, "Config.writeOnDisk - Cannot write unreaded configuration on the disk");
+});
+
+avaTest("Can't close config if read has not been triggered before!", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    const error = await test.throws(config.close());
+    test.is(error.message, "Config.close - Cannot close unreaded configuration");
 });
 
 // avaTest("Write on disk error invalid by ajv", async(test) => {
