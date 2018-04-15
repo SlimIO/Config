@@ -240,7 +240,7 @@ class Config extends Events {
         }
 
         this.autoReloadActivated = true;
-        this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, async(evt, name) => {
+        this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, async() => {
             await this.read();
             this.emit("reload");
         });
