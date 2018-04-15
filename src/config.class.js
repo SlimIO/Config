@@ -401,6 +401,11 @@ class Config extends Events {
      * @returns {Promise<void>}
      */
     async close() {
+        if (!this.configHasBeenRead) {
+            throw new Error(
+                "Config.close - Cannot close unreaded configuration"
+            );
+        }
         if (this.autoReloadActivated && !this.watcher.isClosed()) {
             this.watcher.close();
             this.autoReloadActivated = false;
