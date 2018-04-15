@@ -309,12 +309,6 @@ class Config extends Events {
         if (!this.configHasBeenRead) {
             throw new Error("Config.writeOnDisk - Cannot write unreaded configuration on the disk");
         }
-        if (this[schema](this[payload]) === false) {
-            const errors = formatAjvErrors(this[schema].errors);
-            throw new Error(
-                `Config.writeOnDisk - Cannot write on the disk invalid config, err => ${errors}`
-            );
-        }
 
         await FSAsync.access(this.configFile, W_OK);
         await FSAsync.writeFile(this.configFile, JSON.stringify(this[payload], null, 4));
