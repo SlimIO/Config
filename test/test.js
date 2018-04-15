@@ -1,9 +1,12 @@
 /* eslint no-new: off */
+/* eslint max-len: off */
 
 // Require Dependencies!
 const avaTest = require("ava");
 const is = require("@sindresorhus/is");
 const Config = require("../src/config.class");
+const { formatAjvErrors } = require("../src/utils.js");
+
 const { promisify } = require("util");
 const {
     access,
@@ -38,11 +41,18 @@ const configJSON = {
 let count = 0;
 
 avaTest.after.always("Guaranteed cleanup", async() => {
-    // Promise all ?
+    const toDelete = [];
     for (let num = 1; num < count + 1; num++) {
-        await FSAsync.unlink(`./test/config${num}.schema.json`);
-        await FSAsync.unlink(`./test/config${num}.json`);
+        toDelete.push(FSAsync.unlink(`./test/config${num}.schema.json`));
+        toDelete.push(FSAsync.unlink(`./test/config${num}.json`));
     }
+    toDelete.push(FSAsync.unlink("./test/basicConfig.json"));
+    toDelete.push(FSAsync.unlink("./test/basicConfig3.json"));
+    toDelete.push(FSAsync.unlink("./test/basicConfig4.json"));
+    toDelete.push(FSAsync.unlink("./test/defaultSchemaConfig1.json"));
+    toDelete.push(FSAsync.unlink("./test/defaultSchemaConfig2.json"));
+    
+    await Promise.all(toDelete);
 });
 
 async function createFiles(options) {
@@ -55,7 +65,10 @@ async function createFiles(options) {
         `./test/config${num}.json`,
         JSON.stringify(configJSON, null, 4));
 
-    return new Config(`./test/config${num}.json`, options);
+    return {
+        num,
+        config: new Config(`./test/config${num}.json`, options)
+    };
 }
 
 function configTypeChecker(test, config, checkInitConfig = false) {
@@ -79,7 +92,7 @@ function configTypeChecker(test, config, checkInitConfig = false) {
 }
 
 avaTest("Basic", async(test) => {
-    const config = await createFiles();
+    const { config } = await createFiles();
     configTypeChecker(test, config, true);
     await config.read();
     test.is(is(config.payload), "Object");
@@ -88,19 +101,29 @@ avaTest("Basic", async(test) => {
     await config.close();
 });
 
-avaTest("AutoReload", async(test) => {
+avaTest("Basic defaultSchema", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config, true);
+    await config.read();
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
+    await config.close();
+});
+
+avaTest("AutoReload by set", async(test) => {
     // Rewrite with writeFile function
     const options = {
         autoReload: true
     };
-    const config = await createFiles(options);
+    const { config } = await createFiles(options);
     configTypeChecker(test, config);
     await config.read();
     test.is(is(config.payload), "Object");
     test.is(is(config.payload.foo), "string");
     test.is(config.payload.foo, "world!");
 
-    config.set("foo", "Hello"); 
+    config.set("foo", "Hello");
     test.is(is(config.payload), "Object");
     test.is(is(config.payload.foo), "string");
     test.is(config.payload.foo, "Hello");
@@ -108,13 +131,38 @@ avaTest("AutoReload", async(test) => {
     await config.close();
 });
 
-avaTest("Observable", async(te) => {
-    const config = await createFiles();
-    configTypeChecker(te, config);
+avaTest("AutoReload by writeFile", async(test) => {
+    const options = {
+        autoReload: true
+    };
+    const { config, num } = await createFiles(options);
+    configTypeChecker(test, config);
     await config.read();
-    te.is(is(config.payload), "Object");
-    te.is(is(config.payload.foo), "string");
-    te.is(config.payload.foo, "world!");
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
+
+    await new Promise(async(resolve) => {
+        const newConfigJSON = { foo: "Hello" };
+        config.on("reload", () => {
+            test.is(is(config.payload), "Object");
+            test.is(is(config.payload.foo), "string");
+            test.is(config.payload.foo, "Hello");
+            resolve();
+        });
+        await FSAsync.writeFile(`./test/config${num}.json`, JSON.stringify(newConfigJSON, null, 4));
+    });
+    console.log(config);
+    await config.close();
+});
+
+avaTest("Observable", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    await config.read();
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
 
     const obs = config.observableOf("foo");
     let subbed = false;
@@ -126,20 +174,20 @@ avaTest("Observable", async(te) => {
             }
         });
         config.set("foo", "Hello");
-        te.is(is(config.payload), "Object");
-        te.is(is(config.payload.foo), "string");
-        te.is(config.payload.foo, "Hello");
+        test.is(is(config.payload), "Object");
+        test.is(is(config.payload.foo), "string");
+        test.is(config.payload.foo, "Hello");
     });
-    te.is(subbed, true);
-    
+    test.is(config.subscriptionObservers.length, 1);
+    test.is(subbed, true);
     await config.close();
 });
 
-avaTest("Get Payload without read", async(te) => {
-    const config = await createFiles();
-    configTypeChecker(te, config);
+avaTest("Get Payload without read", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
     const payload = config.payload;
-    te.is(payload, null);
+    test.is(payload, null);
 });
 
 avaTest("Constructor throw error 'configFilePath should be typeof <string>'", (test) => {
@@ -160,3 +208,229 @@ avaTest("Constructor .schema default config file", (test) => {
     const config = new Config("./test/config.schema.json");
     configTypeChecker(test, config);
 });
+
+avaTest("Option Default Schema", async(test) => {
+    const options = {
+        defaultSchema: {
+            title: "Config",
+            type: "object",
+            properties: {
+                foo: {
+                    type: "string"
+                }
+            },
+            required: ["foo"]
+        }
+    };
+    await FSAsync.writeFile(
+        "./test/defaultSchemaConfig1.json",
+        JSON.stringify(configJSON, null, 4)
+    );
+    const config = new Config("./test/defaultSchemaConfig1.json", options);
+    configTypeChecker(test, config);
+    await config.read();
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
+    config.set("foo", "Hello");
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "Hello");
+    await config.close();
+});
+
+avaTest("Default Schema", async(test) => {
+    await FSAsync.writeFile(
+        "./test/defaultSchemaConfig2.json",
+        JSON.stringify(configJSON, null, 4)
+    );
+    const config = new Config("./test/defaultSchemaConfig2.json");
+    configTypeChecker(test, config);
+    await config.read();
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "world!");
+    config.set("foo", "Hello");
+    test.is(is(config.payload), "Object");
+    test.is(is(config.payload.foo), "string");
+    test.is(config.payload.foo, "Hello");
+    await config.close();
+});
+
+avaTest("Set Payload: can't set a new payload when not been read", async(test) => {
+    const newPayload = {
+        foo: "test"
+    };
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    const error = test.throws(() => {
+        config.payload = newPayload;
+    });
+    test.is(error.message, "Config.payload - cannot set a new payload when the config has not been read yet!");
+});
+
+avaTest("Set Payload: newPayload should be typeof <Object>", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    await config.read();
+    const error = test.throws(() => {
+        config.payload = 10;
+    });
+    test.is(error.message, "Config.payload->newPayload should be typeof <Object>");
+    await config.close();
+});
+
+avaTest("Set Payload which is not validate whit the schema", async(test) => {
+    const newPayload = {
+        foo: 10
+    };
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    await config.read();
+    const error = test.throws(() => {
+        config.payload = newPayload;
+    }, Error);
+    test.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
+    await config.close();
+});
+
+avaTest("formatAjvErrors no param array error", (test) => {
+    const result = formatAjvErrors(10);
+    test.is(is(result), "string");
+    test.is(result, "");
+});
+
+avaTest("Zero configuration", async(test) => {
+    const options = {
+        createOnNoEntry: true
+    };
+    const config = new Config("./test/basicConfig.json", options);
+    configTypeChecker(test, config);
+    await config.read();
+    await config.close();
+});
+
+avaTest("Zero configuration without createOnNoEntry", async(test) => {
+    const config = new Config("./test/basicConfig2.json");
+    configTypeChecker(test, config);
+    const error = await test.throws(config.read());
+    test.is(is(error.errno), "number");
+    test.is(is(error.code), "string");
+    test.is(is(error.syscall), "string");
+    test.is(error.errno, -4058);
+    test.is(error.code, "ENOENT");
+    test.is(error.syscall, "access");
+});
+
+avaTest("Read deafault payload", async(test) => {
+    const options = {
+        createOnNoEntry: true
+    };
+    const config = new Config("./test/basicConfig3.json", options);
+    configTypeChecker(test, config);
+    await config.read(configJSON);
+    await config.close();
+});
+
+// Find another name ?
+avaTest("Reasign default payload", async(test) => {
+    const options = {
+        createOnNoEntry: true
+    };
+    const config = new Config("./test/basicConfig4.json", options);
+    configTypeChecker(test, config);
+    await config.read(configJSON);
+    await FSAsync.unlink("./test/basicConfig4.json");
+    await config.read();
+    await config.close();
+});
+
+avaTest("SetupAutoReaload error before read", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    const error = test.throws(() => {
+        config.setupAutoReload();
+    }, Error);
+    test.is(error.message, "Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!");
+});
+
+avaTest("SetupAutoReaload twice for return", async(test) => {
+    const options = {
+        autoReload: true
+    };
+    const { config } = await createFiles(options);
+    configTypeChecker(test, config);
+    await config.read();
+    config.setupAutoReload();
+    await config.close();
+});
+
+avaTest("Get config filedPath error before read", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    const error = test.throws(() => {
+        config.get("foo");
+    }, Error);
+    test.is(error.message, "Config.get - Unable to get a key, the configuration has not been initialized yet!");
+});
+
+avaTest("Get config filedPath error without string", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    await config.read();
+    const error = test.throws(() => {
+        config.get(10);
+    }, TypeError);
+    test.is(error.message, "Config.get->fieldPath should be typeof <string>");
+});
+
+avaTest("Set config key error before read", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    const error = test.throws(() => {
+        config.set("foo", "Hello");
+    }, Error);
+    test.is(error.message, "Config.set - Unable to set a key, the configuration has not been initialized yet!");
+});
+
+avaTest("Set config filedPath error without string", async(test) => {
+    const { config } = await createFiles();
+    configTypeChecker(test, config);
+    await config.read();
+    const error = test.throws(() => {
+        config.set(10);
+    }, TypeError);
+    test.is(error.message, "Config.set->fieldPath should be typeof <string>");
+});
+
+avaTest("Write on set", async(test) => {
+    const options = {
+        writeOnSet: true
+    };
+    const { config } = await createFiles(options);
+    configTypeChecker(test, config);
+    await config.read();
+    config.set("foo", "Hello");
+});
+
+avaTest("Write on disk error before read", async(test) => {
+    const options = {
+        writeOnSet: true
+    };
+    const { config } = await createFiles(options);
+    configTypeChecker(test, config);
+    const error = await test.throws(config.writeOnDisk());
+    test.is(error.message, "Config.writeOnDisk - Cannot write unreaded configuration on the disk");
+});
+
+// avaTest("Write on disk error invalid by ajv", async(test) => {
+//     const options = {
+//         writeOnSet: true
+//     };
+//     const { config } = await createFiles(options);
+//     configTypeChecker(test, config);
+//     await config.read();
+//     const error = test.throws(config.set("foo", 10));
+//     console.log(error);
+//     test.is(error.message, "Config.writeOnDisk - Cannot write on the disk invalid config, err => ");
+// });

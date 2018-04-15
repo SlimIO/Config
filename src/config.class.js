@@ -209,9 +209,15 @@ class Config extends Events {
      * @return {void}
      */
     setupAutoReload() {
-        if (!this.configHasBeenRead || this.autoReloadActivated) {
+        if (!this.configHasBeenRead) {
+            throw new Error(
+                "Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!"
+            );
+        }
+        if (this.autoReloadActivated) {
             return;
         }
+
         this.autoReloadActivated = true;
         this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, async(evt, name) => {
             await this.read();
@@ -264,8 +270,8 @@ class Config extends Events {
     /**
      * @public
      * @template H
-     * @method get
-     * @desc Get a given field of the configuration
+     * @method set
+     * @desc Set a field in the configuration
      * @memberof Config#
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @param {!H} fieldValue Field value
@@ -277,11 +283,11 @@ class Config extends Events {
     set(fieldPath, fieldValue) {
         if (!this.configHasBeenRead) {
             throw new Error(
-                "Config.get - Unable to set a key, the configuration has not been initialized yet!"
+                "Config.set - Unable to set a key, the configuration has not been initialized yet!"
             );
         }
         if (is(fieldPath) !== "string") {
-            throw new TypeError("Config.get->fieldPath should be typeof <string>");
+            throw new TypeError("Config.set->fieldPath should be typeof <string>");
         }
 
         this.payload = set(this.payload, fieldPath, fieldValue);
