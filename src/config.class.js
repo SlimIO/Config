@@ -29,8 +29,8 @@ const FSAsync = {
 };
 
 // Private Config Accessors
-const payload = Symbol();
-const schema = Symbol();
+const payload = Symbol("payload");
+const schema = Symbol("schema");
 
 /**
  * @class Config
