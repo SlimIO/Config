@@ -1,7 +1,7 @@
 // Require Node.JS core packages
 const { parse, extname } = require("path");
 const { promisify } = require("util");
-const Events = require("events");
+const events = require("events");
 const {
     access,
     readFile,
@@ -9,7 +9,7 @@ const {
     constants: { R_OK, W_OK }
 } = require("fs");
 
-// Require third-party NPM package(s)
+// Require Third-party NPM package(s)
 const watcher = require("node-watch");
 const is = require("@sindresorhus/is");
 const ajv = new (require("ajv"))({ useDefaults: "shared" });
@@ -18,7 +18,7 @@ const clonedeep = require("lodash.clonedeep");
 const set = require("lodash.set");
 const Observable = require("zen-observable");
 
-// Require internal dependencie(s)
+// Require Internal dependencie(s)
 const { formatAjvErrors } = require("./utils");
 
 // FS Async Wrapper
@@ -35,6 +35,7 @@ const schema = Symbol();
 /**
  * @class Config
  * @classdesc Reactive JSON Config loader class
+ * @extends events
  * @template T
  *
  * @property {String} configFile Path to the configuration file
@@ -52,7 +53,7 @@ const schema = Symbol();
  * @author Thomas GENTILHOMME <gentilhomme.thomas@gmail.com>
  * @version 0.1.0
  */
-class Config extends Events {
+class Config extends events {
 
     /**
      * @constructor
@@ -62,10 +63,21 @@ class Config extends Events {
      * @param {Boolean=} [options.autoReload=false] Enable/Disable hot reload of the configuration file.
      * @param {Boolean=} [options.writeOnSet=false] Write configuration on the disk after a set action
      * @param {Object=} options.defaultSchema Optional default Schema
-     * @param {Number=} [options.reloadDelay=1000] Hot reload delay
+     * @param {Number=} [options.reloadDelay=1000] Hot reload delay (in milliseconds)
      *
      * @throws {TypeError}
      * @throws {Error}
+     *
+     * @version 0.1.0
+     *
+     * @example
+     * const cfgOptions = {
+     *     autoReload: true,
+     *     createOnNoEntry: true,
+     *     writeOnSet: true,
+     *     reloadDelay: 2000
+     * };
+     * const cfgM = new Config("./path/to/config.json", cfgOptions);
      */
     constructor(configFilePath, options = {}) {
         super();
@@ -105,6 +117,14 @@ class Config extends Events {
      * @memberof Config#
      * @member {Object} payload
      * @desc Get a payload Object clone (or null if the configuration has not been read yet)
+     *
+     * @version 0.1.0
+     *
+     * @example
+     * const cfg = new Config("./path/to/config.json");
+     * await cfg.read();
+     * const configContent = cfg.payload;
+     * console.log(JSON.stringify(configContent, null, 2));
      */
     get payload() {
         if (!this.configHasBeenRead) {
@@ -123,6 +143,22 @@ class Config extends Events {
      *
      * @throws {Error}
      * @throws {TypeError}
+     *
+     * @version 0.1.0
+     *
+     * @example
+     * const cfg = new Config("./path/to/config.json");
+     * await cfg.read();
+     *
+     * // Assign a new cfg (payload). It should match the cfg Schema (if there is any)
+     * try {
+     *     cfg.payload = {
+     *         foo: "bar"
+     *     };
+     * }
+     * catch (error) {
+     *     // handle error here!
+     * }
      */
     set payload(newPayload) {
         if (!this.configHasBeenRead) {
@@ -155,6 +191,8 @@ class Config extends Events {
      * @memberof Config#
      * @param {T=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
      * @return {Promise<this>}
+     *
+     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./path/to/config.json", {
@@ -227,13 +265,14 @@ class Config extends Events {
      * @memberof Config#
      * @return {void}
      *
+     * @version 0.1.0
+     *
      * @throws {Error}
      */
     setupAutoReload() {
         if (!this.configHasBeenRead) {
-            throw new Error(
-                "Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!"
-            );
+            // eslint-disable-next-line max-len
+            throw new Error("Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!");
         }
         if (this.autoReloadActivated) {
             return;
@@ -257,6 +296,8 @@ class Config extends Events {
      *
      * @throws {Error}
      * @throws {TypeError}
+     *
+     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./path/to/config.json", {
@@ -291,6 +332,8 @@ class Config extends Events {
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @memberof Config#
      * @return {Observable}
+     *
+     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./config.json", {
@@ -340,6 +383,8 @@ class Config extends Events {
      * @throws {Error}
      * @throws {TypeError}
      *
+     * @version 0.1.0
+     *
      * @example
      * const myConfig = new Config("./config.json", {
      *     createOnNoEntry: true,
@@ -383,6 +428,15 @@ class Config extends Events {
      * @returns {Promise<void>}
      *
      * @throws {Error}
+     *
+     * @version 0.1.0
+     *
+     * @example
+     * // Config can be created with the option `writeOnSet` that enable cfg auto-writing on disk after every set!
+     * const cfg = new Config("./path/to/config.json");
+     * await cfg.read();
+     * cfg.set("field.path", "value");
+     * await cfg.writeOnDisk();
      */
     async writeOnDisk() {
         if (!this.configHasBeenRead) {
@@ -396,15 +450,22 @@ class Config extends Events {
     /**
      * @public
      * @method close
-     * @desc Close the configuration (it will close the watcher and all active observers).
+     * @desc Close (and write on disk) the configuration (it will close the watcher and clean all active observers).
      * @memberof Config#
      * @returns {Promise<void>}
+     *
+     * @throws {Error}
+     *
+     * @version 0.1.0
+     *
+     * @example
+     * const cfg = new Config("./path/to/config.json");
+     * await cfg.read();
+     * await cfg.close();
      */
     async close() {
         if (!this.configHasBeenRead) {
-            throw new Error(
-                "Config.close - Cannot close unreaded configuration"
-            );
+            throw new Error("Config.close - Cannot close unreaded configuration");
         }
         if (this.autoReloadActivated && !this.watcher.isClosed()) {
             this.watcher.close();
@@ -426,4 +487,5 @@ Config.DEFAULTSchema = {
     additionalProperties: true
 };
 
+// Export class
 module.exports = Config;
