@@ -124,7 +124,7 @@ class Config extends events {
      */
     get payload() {
         if (!this.configHasBeenRead) {
-            return null;
+            return Object.create(null);
         }
 
         return clonedeep(this[payload]);

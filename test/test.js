@@ -1,27 +1,20 @@
 /* eslint no-new: off */
 /* eslint max-len: off */
 
-// Require Dependencies!
+// Require Node.JS Dependencies
+const {
+    writeFile,
+    unlink
+} = require("fs").promises;
+
+// Require Third-Party Dependencies!
 const avaTest = require("ava");
 const is = require("@sindresorhus/is");
+
+// Require Internal Dependencies
 const Config = require("../src/config.class");
 const { formatAjvErrors } = require("../src/utils.js");
 
-const { promisify } = require("util");
-const {
-    access,
-    readFile,
-    writeFile,
-    unlink
-} = require("fs");
-
-// FS Async Wrapper
-const FSAsync = {
-    access: promisify(access),
-    readFile: promisify(readFile),
-    writeFile: promisify(writeFile),
-    unlink: promisify(unlink)
-};
 
 const configSchemaJSON = {
     title: "Config",
@@ -43,25 +36,25 @@ let count = 0;
 avaTest.after.always("Guaranteed cleanup", async() => {
     const toDelete = [];
     for (let num = 1; num < count + 1; num++) {
-        toDelete.push(FSAsync.unlink(`./test/config${num}.schema.json`));
-        toDelete.push(FSAsync.unlink(`./test/config${num}.json`));
+        toDelete.push(unlink(`./test/config${num}.schema.json`));
+        toDelete.push(unlink(`./test/config${num}.json`));
     }
-    toDelete.push(FSAsync.unlink("./test/basicConfig.json"));
-    toDelete.push(FSAsync.unlink("./test/basicConfig3.json"));
-    toDelete.push(FSAsync.unlink("./test/basicConfig4.json"));
-    toDelete.push(FSAsync.unlink("./test/defaultSchemaConfig1.json"));
-    toDelete.push(FSAsync.unlink("./test/defaultSchemaConfig2.json"));
+    toDelete.push(unlink("./test/basicConfig.json"));
+    toDelete.push(unlink("./test/basicConfig3.json"));
+    toDelete.push(unlink("./test/basicConfig4.json"));
+    toDelete.push(unlink("./test/defaultSchemaConfig1.json"));
+    toDelete.push(unlink("./test/defaultSchemaConfig2.json"));
 
     await Promise.all(toDelete);
 });
 
 async function createFiles(options = {}) {
     const num = ++count;
-    await FSAsync.writeFile(
+    await writeFile(
         `./test/config${num}.schema.json`,
         JSON.stringify(configSchemaJSON, null, 4)
     );
-    await FSAsync.writeFile(
+    await writeFile(
         `./test/config${num}.json`,
         JSON.stringify(configJSON, null, 4)
     );
@@ -151,7 +144,7 @@ avaTest("AutoReload by writeFile", async(test) => {
             test.is(config.payload.foo, "Hello");
             resolve();
         });
-        await FSAsync.writeFile(`./test/config${num}.json`, JSON.stringify(newConfigJSON, null, 4));
+        await writeFile(`./test/config${num}.json`, JSON.stringify(newConfigJSON, null, 4));
     });
     await config.close();
 });
@@ -187,7 +180,7 @@ avaTest("Get Payload without read", async(test) => {
     const { config } = await createFiles();
     configTypeChecker(test, config);
     const payload = config.payload;
-    test.is(payload, null);
+    test.deepEqual(payload, Object.create(null));
 });
 
 avaTest("Constructor throw error 'configFilePath should be typeof <string>'", (test) => {
@@ -222,7 +215,7 @@ avaTest("Option Default Schema", async(test) => {
             required: ["foo"]
         }
     };
-    await FSAsync.writeFile(
+    await writeFile(
         "./test/defaultSchemaConfig1.json",
         JSON.stringify(configJSON, null, 4)
     );
@@ -240,7 +233,7 @@ avaTest("Option Default Schema", async(test) => {
 });
 
 avaTest("Default Schema", async(test) => {
-    await FSAsync.writeFile(
+    await writeFile(
         "./test/defaultSchemaConfig2.json",
         JSON.stringify(configJSON, null, 4)
     );
@@ -340,7 +333,7 @@ avaTest("Reasign default payload", async(test) => {
     const config = new Config("./test/basicConfig4.json", options);
     configTypeChecker(test, config);
     await config.read(configJSON);
-    await FSAsync.unlink("./test/basicConfig4.json");
+    await unlink("./test/basicConfig4.json");
     await config.read();
     await config.close();
 });
