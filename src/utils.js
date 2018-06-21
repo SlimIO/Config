@@ -8,6 +8,7 @@ const is = require("@sindresorhus/is");
 /**
  * @exports utils/formatAjvErrors
  * @function formatAjvErrors
+ * @memberof utils#
  * @desc format ajv errors
  * @param {ajv.ErrorObject[]} ajvErrors Array of ajv error Object
  * @returns {String}
