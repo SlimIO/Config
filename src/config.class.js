@@ -44,6 +44,8 @@ const schema = Symbol("schema");
  * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
  * @property {Object} defaultSchema
  *
+ * @event reload
+ *
  * @author Thomas GENTILHOMME <gentilhomme.thomas@gmail.com>
  * @version 0.1.0
  */
@@ -73,9 +75,9 @@ class Config extends events {
      * };
      * const cfgM = new Config("./path/to/config.json", cfgOptions);
      */
-    constructor(configFilePath, options = {}) {
+    constructor(configFilePath, options = Object.create(null)) {
         super();
-        if (is(configFilePath) !== "string") {
+        if (!is.string(configFilePath)) {
             throw new TypeError("Config.constructor->configFilePath should be typeof <string>");
         }
 
@@ -156,11 +158,10 @@ class Config extends events {
      */
     set payload(newPayload) {
         if (!this.configHasBeenRead) {
-            throw new Error(
-                "Config.payload - cannot set a new payload when the config has not been read yet!"
-            );
+            // eslint-disable-next-line max-len
+            throw new Error("Config.payload - cannot set a new payload when the config has not been read yet!");
         }
-        if (is(newPayload) !== "Object") {
+        if (!is.object(newPayload)) {
             throw new TypeError("Config.payload->newPayload should be typeof <Object>");
         }
 
@@ -204,24 +205,21 @@ class Config extends events {
      */
     async read(defaultPayload) {
         // Declare scoped variable(s) to the top
-        let JSONConfig;
-        let JSONSchema;
+        let JSONConfig, JSONSchema;
 
         // Get and parse the JSON Configuration file (if exist).
         // If he doesn't exist we replace it by the defaultPayload or the precedent loaded payload
         try {
             await access(this.configFile, R_OK | W_OK);
-            JSONConfig = JSON.parse(
-                await readFile(this.configFile)
-            );
+            JSONConfig = JSON.parse(await readFile(this.configFile));
         }
         catch (err) {
             if (!this.createOnNoEntry || err.code !== "ENOENT") {
                 throw err;
             }
-            JSONConfig = is(defaultPayload) === "Object" ?
+            JSONConfig = is.object(defaultPayload) ?
                 defaultPayload :
-                is.nullOrUndefined(this[payload]) ? {} : this.payload;
+                is.nullOrUndefined(this[payload]) ? Object.create(null) : this.payload;
             await writeFile(this.configFile, JSON.stringify(JSONConfig, null, 4));
         }
 
@@ -229,9 +227,7 @@ class Config extends events {
         // If he doesn't exist we replace it with a default Schema
         try {
             await access(this.schemaFile, R_OK);
-            JSONSchema = JSON.parse(
-                await readFile(this.schemaFile)
-            );
+            JSONSchema = JSON.parse(await readFile(this.schemaFile));
         }
         catch (err) {
             if (err.code !== "ENOENT") {
@@ -268,6 +264,8 @@ class Config extends events {
             // eslint-disable-next-line max-len
             throw new Error("Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!");
         }
+
+        // Return if autoReload is already actived
         if (this.autoReloadActivated) {
             return;
         }
@@ -308,11 +306,10 @@ class Config extends events {
      */
     get(fieldPath) {
         if (!this.configHasBeenRead) {
-            throw new Error(
-                "Config.get - Unable to get a key, the configuration has not been initialized yet!"
-            );
+            // eslint-disable-next-line max-len
+            throw new Error("Config.get - Unable to get a key, the configuration has not been initialized yet!");
         }
-        if (is(fieldPath) !== "string") {
+        if (!is.string(fieldPath)) {
             throw new TypeError("Config.get->fieldPath should be typeof <string>");
         }
 
@@ -356,9 +353,11 @@ class Config extends events {
      * main().catch(console.error);
      */
     observableOf(fieldPath) {
-        const fieldValue = this.get(fieldPath);
-
         return new Observable((observer) => {
+            // Retrieve the field value first
+            const fieldValue = this.get(fieldPath);
+
+            // Send it as first Observed value!
             observer.next(fieldValue);
             this.subscriptionObservers.push([fieldPath, observer]);
         });
@@ -400,17 +399,21 @@ class Config extends events {
      */
     set(fieldPath, fieldValue) {
         if (!this.configHasBeenRead) {
-            throw new Error(
-                "Config.set - Unable to set a key, the configuration has not been initialized yet!"
-            );
+            // eslint-disable-next-line max-len
+            throw new Error("Config.set - Unable to set a key, the configuration has not been initialized yet!");
         }
-        if (is(fieldPath) !== "string") {
+        if (!is.string(fieldPath)) {
             throw new TypeError("Config.set->fieldPath should be typeof <string>");
         }
 
+        // Setup the new cfg by using the getter/setter payload
         this.payload = set(this.payload, fieldPath, fieldValue);
+
+        // If writeOnSet option is actived, writeOnDisk at the next loop iteration (lazy)
         if (this.writeOnSet) {
-            process.nextTick(this.writeOnDisk.bind(this));
+            setImmediate(() => {
+                this.writeOnDisk().catch(console.error);
+            });
         }
     }
 
@@ -466,9 +469,13 @@ class Config extends events {
             this.autoReloadActivated = false;
         }
 
+        // Write the Configuration on the disk to be safe
         await this.writeOnDisk();
-        for (const [, subscriptionObservers] of this.subscriptionObservers) {
+
+        // Complete all observers
+        for (const [index, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.complete();
+            this.subscriptionObservers.splice(index, 1);
         }
         this.configHasBeenRead = false;
     }
