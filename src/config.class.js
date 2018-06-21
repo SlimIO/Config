@@ -1,11 +1,12 @@
 // Require Node.JS core packages
 const { parse, extname } = require("path");
-const { promisify } = require("util");
 const events = require("events");
 const {
-    access,
-    readFile,
-    writeFile,
+    promises: {
+        access,
+        readFile,
+        writeFile
+    },
     constants: { R_OK, W_OK }
 } = require("fs");
 
@@ -20,13 +21,6 @@ const Observable = require("zen-observable");
 
 // Require Internal dependencie(s)
 const { formatAjvErrors } = require("./utils");
-
-// FS Async Wrapper
-const FSAsync = {
-    access: promisify(access),
-    readFile: promisify(readFile),
-    writeFile: promisify(writeFile)
-};
 
 // Private Config Accessors
 const payload = Symbol("payload");
@@ -216,9 +210,9 @@ class Config extends events {
         // Get and parse the JSON Configuration file (if exist).
         // If he doesn't exist we replace it by the defaultPayload or the precedent loaded payload
         try {
-            await FSAsync.access(this.configFile, R_OK | W_OK);
+            await access(this.configFile, R_OK | W_OK);
             JSONConfig = JSON.parse(
-                await FSAsync.readFile(this.configFile)
+                await readFile(this.configFile)
             );
         }
         catch (err) {
@@ -228,15 +222,15 @@ class Config extends events {
             JSONConfig = is(defaultPayload) === "Object" ?
                 defaultPayload :
                 is.nullOrUndefined(this[payload]) ? {} : this.payload;
-            await FSAsync.writeFile(this.configFile, JSON.stringify(JSONConfig, null, 4));
+            await writeFile(this.configFile, JSON.stringify(JSONConfig, null, 4));
         }
 
         // Get and parse the JSON Schema file (only if he exist).
         // If he doesn't exist we replace it with a default Schema
         try {
-            await FSAsync.access(this.schemaFile, R_OK);
+            await access(this.schemaFile, R_OK);
             JSONSchema = JSON.parse(
-                await FSAsync.readFile(this.schemaFile)
+                await readFile(this.schemaFile)
             );
         }
         catch (err) {
@@ -443,8 +437,8 @@ class Config extends events {
             throw new Error("Config.writeOnDisk - Cannot write unreaded configuration on the disk");
         }
 
-        await FSAsync.access(this.configFile, W_OK);
-        await FSAsync.writeFile(this.configFile, JSON.stringify(this[payload], null, 4));
+        await access(this.configFile, W_OK);
+        await writeFile(this.configFile, JSON.stringify(this[payload], null, 4));
     }
 
     /**
