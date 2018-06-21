@@ -14,7 +14,8 @@
     "url": "git+https://github.com/SlimIO/Config.git"
   },
   "engines": {
-    "node": ">=8.11.1"
+    "npm": ">=6.0.0",
+    "node": ">=10.1.0"
   },
   "keywords": [
     "SlimIO",
