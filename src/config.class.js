@@ -415,6 +415,8 @@ class Config extends events {
                 this.writeOnDisk().catch(console.error);
             });
         }
+
+        return this;
     }
 
     /**
