@@ -3,6 +3,6 @@
 .gitignore
 test
 tests
-docs
+jsdoc
 spec
 CONTRIBUTING.md
