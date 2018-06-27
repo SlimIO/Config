@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+    <title>Config specification</title>
+</head>
+<body>
+    <h1>Configuration</h1>
+    <section class="note">
+        <p class="title">Note</p>
+        <p>The config class is extended by the Node.JS events module</p>
+    </section>
+    <section class="tab">
+        <h2>1.0.0 <span>[[constructor]]</span>( <a>configFilePath</a> [, <a>options</a>] )</h2>
+        <p class="desc">Create a new instance of Config class JavaScript Object.</p>
+        <ul>
+            <li>Call <span>[[super]]</span></li>
+            <li>Unless <b>Type</b>(<a>configFilePath</a>) is equal to <b class="string">"string"</b>, throw a <b>TypeError</b> exception.</li>
+            <li>If <a>options</a> is not present, then</li>
+            <ul class="sub">
+                <li>Let <a>options</a> be <b>Object</b>(<b class="prim">null</b>)</li>
+            </ul>
+            <li><i>Throw TypeError</i>Call <b>path.parse</b>(<a>configFilePath</a>) and let <a>parseResult</a> be the result.</li>
+            <li>Let <a>ext</a> be ? <b>getObjectProperty</b>(<a>parseResult</a>, <b class="string">"ext"</b>).</li>
+            <li>Let <a>dir</a> be ? <b>getObjectProperty</b>(<a>parseResult</a>, <b class="string">"dir"</b>).</li>
+            <li>Let <a>name</a> be ? <b>getObjectProperty</b>(<a>parseResult</a>, <b class="string">"name"</b>).</li>
+            <li>Unless <b>Value</b>(<a>ext</a>) is equal to <b>String</b>(<b class="string">".json"</b>), throw an <b>Error</b> exception</li>
+            <li>Let <span>[[this]]</span>.<a>configFile</a> be ? <b>Value</b>(<a>configFilePath</a>)</li>
+            <li><i>Throw TypeError</i>Call <b>path.extname</b>(<a>name</a>) and let <a>nameExt</a> be the result.</li>
+            <li>If <b>Value</b>(<a>nameExt</a>) is equal to <b>String</b>(<b class="string">".schema"</b>), Then</li>
+            <ul class="sub">
+                <li>let <span>[[this]]</span>.<a>configFile</a> be ? <b>String</b>(<b class="string">"${<a>dir</a>}/${<a>name</a>}${<a>ext</a>}"</b>)</li>
+            </ul>
+            <li>Else,</li>
+            <ul class="sub">
+                <li>let <span>[[this]]</span>.<a>configFile</a> be ? <b>String</b>(<b class="string">"${<a>dir</a>}/${<a>name</a>}.schema${<a>ext</a>}"</b>)</li>
+            </ul>
+            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>) be ? <b class="prim">null</b></li>
+            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"schema"</b>) be ? <b class="prim">null</b></li>
+            <li>Let <span>[[this]]</span>.<a>createOnNoEntry</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"createOnNoEntry"</b>) or <b class="prim">false</b></li>
+            <li>Let <span>[[this]]</span>.<a>autoReload</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"autoReload"</b>) or <b class="prim">false</b></li>
+            <li>Let <span>[[this]]</span>.<a>autoReloadActivated</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"autoReloadActivated"</b>) or <b class="prim">false</b></li>
+            <li>Let <span>[[this]]</span>.<a>reloadDelay</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"reloadDelay"</b>) or <b class="prim">1000</b></li>
+            <li>Let <span>[[this]]</span>.<a>writeOnSet</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"writeOnSet"</b>) or <b class="prim">false</b></li>
+            <li>Let <span>[[this]]</span>.<a>configHasBeenRead</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"configHasBeenRead"</b>) or <b class="prim">false</b></li>
+            <li>Let <span>[[this]]</span>.<a>subscriptionObservers</a> be ? The result of <b>Array</b>()</li>
+            <li>If <b>objectHasProperty</b>(<a>options</a>, <b class="string">"defaultSchema"</b>), Then</li>
+            <ul class="sub">
+                <li>Let <span>[[this]]</span>.<a>defaultSchema</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"defaultSchema"</b>)</li>
+            </ul>
+        </ul>
+        <hr>
+        <h2>1.0.1 read( <a>defaultPayload</a> : <b class="prim">Object</b> ) : <b class="prim">Promise&lt;<a>this</a>&gt;</b></h2>
+        <p class="desc">Read the configuration file (And optionaly apply a default payload value if the file doesn't exist)</p>
+        <ul>
+            <li>Let <a>JSONConfig</a> and <a>JSONSchema</a> be <b class="prim">undefined</b></li>
+            <li>Try</li>
+            <ul class="sub">
+                <li><i>Throw Exception</i>Call <b>fs.access</b>(<span>[[this]]</span>.<a>configFile</a>, READ_OK | WRITE_OK)</li>
+                <li>Call <b>fs.readFile</b>(<span>[[this]]</span>.<a>configFile</a>) and let <a>buf</a> be the result.</li>
+                <li>Let <a>JSONConfig</a> be ? <b>JSON.parse</b>(<b>toString</b>(<a>buf</a>))</li>
+            </ul>
+            <li>Catch(<a>error</a>)</li>
+            <ul class="sub">
+                <li>Let <a>code</a> be ? <b>getObjectProperty</b>(<a>error</a>, <b class="string">"code"</b>)</li>
+                <li>If <span>[[this]]</span>.<a>createOnNoEntry</a> is <b class="prim">false</b> and <a>code</a> is not equal to <b>String</b>(<b class="string">"ENOENT"</b>), then</li>
+                <ul class="sub">
+                    <li>Throw exception <a>error</a></li>
+                </ul>
+                <li>Call <b>is.Object</b>(<a>defaultPayload</a>) and let <a>pt</a> be the result.</li>
+                <li>If <a>pt</a> is equal to <b class="prim">true</b>, then</li>
+                <ul class="sub">
+                    <li>Let <a>JSONConfig</a> be <b>Value</b>(<a>defaultPayload</a>)</li>
+                </ul>
+                <li>Else,</li>
+                <ul class="sub">
+                    <li>Call <b>is.nullOrUndefined</b>(<span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>)) and let <a>payloadDefined</a> be the result</li>
+                    <li>If <a>payloadDefined</a> is equal to <b class="prim">true</b>, then</li>
+                    <ul class="sub">
+                        <li>Let <a>JSONConfig</a> be ? <b>Object</b>(<b class="prim">null</b>)</li>
+                    </ul>
+                    <li>Else,</li>
+                    <ul class="sub">
+                        <li>Let <a>JSONConfig</a> be <a>self.payload</a></li>
+                    </ul>
+                </ul>
+                <li><i>Warning !</i>Call <b>fs.writeFile</b>(<span>[[this]]</span>.<a>configFile</a>, <b>JSON.stringify</b>(<a>JSONConfig</a>))</li>
+            </ul>
+            <li>Try</li>
+            <ul class="sub">
+                <li><i>Throw Exception</i>Call <b>fs.access</b>(<span>[[this]]</span>.<a>schemaFile</a>, READ_OK)</li>
+                <li>Call <b>fs.readFile</b>(<span>[[this]]</span>.<a>schemaFile</a>) and let <a>buf</a> be the result.</li>
+                <li>Let <a>JSONSchema</a> be ? <b>JSON.parse</b>(<b>toString</b>(<a>buf</a>))</li>
+            </ul>
+            <li>Catch(<a>error</a>)</li>
+            <ul class="sub">
+                <li>Let <a>code</a> be ? <b>getObjectProperty</b>(<a>error</a>, <b class="string">"code"</b>)</li>
+                <li>Unless <a>code</a> is equal to <b>String</b>(<b class="string">"ENOENT"</b>), then</li>
+                <ul class="sub">
+                    <li>Throw exception <a>error</a></li>
+                </ul>
+                <li>Call <b>is.nullOrUndefined</b>(<span>[[this]]</span>.<a>defaultSchema</a>) and let <a>payloadDefined</a> be the result</li>
+                <li>If <a>payloadDefined</a> is equal to <b class="prim">true</b>, then</li>
+                <ul class="sub">
+                    <li>Let <a>JSONSchema</a> be <b>Value</b>(Config.DEFAULTSchema)</li>
+                </ul>
+                <li>Else,</li>
+                <ul class="sub">
+                    <li>Let <a>JSONSchema</a> be <span>[[this]]</span>.<a>defaultSchema</a></li>
+                </ul>
+            </ul>
+            <li><i>Warning !</i>Call <b>ajv.compile</b>(<a>JSONSchema</a>) and let <a>schemaValidator</a> be the result.</li>
+            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"schema"</b>) be <a>schemaValidator</a></li>
+            <li>Let <span>[[this]]</span>.<a>configHasBeenRead</a> be <b class="prim">true</b></li>
+            <li>Let <span>[[this]]</span>.<a>payload</a> be <a>JSONConfig</a></li>
+            <li>If <span>[[this]]</span>.<a>autoReload</a> is equal to <b class="prim">true</b>, then</li>
+            <ul class="sub">
+                <li>Call <span>[[this]]</span><b>.setupAutoReload</b>()</li>
+            </ul>
+            <li>Return <span>[[this]]</span></li>
+        </ul>
+        <hr>
+        <h2>1.0.2 setupAutoReload( ) : <b class="prim">void</b></h2>
+        <p class="desc">Setup configuration autoReload</p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
+            <li>If <span>[[this]]</span>.<a>autoReloadActivated</a> is equal to <b class="prim">true</b>, then</li>
+            <ul class="sub">
+                <li>Return <b class="prim">void</b></li>
+            </ul>
+            <li>Let <span>[[this]]</span><a>.autoReloadActivated</a> be <b class="prim">true</b></li>
+            <li>Let <a>callback</a> be the following set of instructions</li>
+            <ul class="sub">
+                <li>await Call <span>[[this]]</span>.read()</li>
+                <li>Call <span>[[this]]</span>.emit(<b class="string">"ready"</b>)</li>
+            </ul>
+            <li><i>Warning !</i>Let <span>[[this]]</span><a>.watcher</a> be ? <b>watcher</b>(<a>self.configFile</a>, { delay: <a>self.reloadDelay</a> }, <a>calback</a>)</li>
+            <li>Return <b class="prim">void</b></li>
+        </ul>
+        <section class="note">
+            <p class="title">Note 1</p>
+            <p>The npm package <b>node-watch</b> is used to create a perfect system update hook on all major OS.</p>
+        </section>
+        <hr>
+        <h2>1.0.3 get<<b class="prim">T</b>>( <a>fieldPath</a> : <b class="prim">string</b> ) : <b class="prim">T</b></h2>
+        <p class="desc">Retrieve a given value (with the field path) in the current loaded configuration payload</p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
+            <li>Unless <b>Type</b>(<a>fieldPath</a>) is equal to <b class="string">"string"</b>, throw a <b>TypeError</b> exception.</li>
+            <li><i>Warning !</i>Call <b>lodash.get</b>(<span>[[this]]</span>.<a>payload</a>, <a>fieldPath</a>) and let <a>ret</a> be the result.</li>
+            <li>Return <a>ret</a>.</li>
+        </ul>
+        <section class="note">
+            <p class="title">Note 1</p>
+            <p>The getter <a>payload</a> return a <b>deepClone</b> of the current loaded configuration.</p>
+        </section>
+        <hr>
+        <h2>1.0.3 set<<b class="prim">T</b>>( <a>fieldPath</a> : <b class="prim">string</b> , <a>fieldValue</a> : <b class="prim">T</b> ) : <b class="prim">void</b></h2>
+        <p class="desc">Set a field in the current loaded configuration payload</p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
+            <li>Unless <b>Type</b>(<a>fieldPath</a>) is equal to <b class="string">"string"</b>, throw a <b>TypeError</b> exception.</li>
+            <li>Call <b>lodash.set</b>(<span>[[this]]</span>.<a>payload</a>, <a>fieldPath</a>, <a>fieldValue</a>) and let <a>setProperty</a> be the result</li>
+            <li>Let <span>[[this]]</span>.<a>payload</a> be <a>setProperty</a></li>
+            <li>If <span>[[this]]</span>.<a>writeOnSet</a> is equal to <b class="prim">true</b>, then</li>
+            <ul class="sub">
+                <li>Let <a>callback</a> be the following set of instructions</li>
+                <ul class="sub">
+                    <li>Call <span>[[this]]</span>.writeOnDisk()</li>
+                </ul>
+                <li><b>setImmediate</b>(<a>callback</a>);</li>
+            </ul>
+            <li>Return <b class="prim">void</b></li>
+        </ul>
+        <hr>
+        <h2>1.0.4 writeOnDisk( ) : <b class="prim">Promise</b>&lt;<b class="prim">void</b>&gt;</h2>
+        <p class="desc">Write the current configuration payload on the Disk</p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
+            <li><i>Throw Exception</i>Call <b>fs.access</b>(<span>[[this]]</span>.<a>configFile</a>, WRITE_OK)</li>
+            <li>Let <a>O</a> be the result of <b>JSON.stringify</b>(<span>[[this]]</span>.<a>payload</a>)</li>
+            <li>Call <b>fs.writeFile</b>(<span>[[this]]</span>.<a>configFile</a>, <a>O</a>)</li>
+            <li>Return <b class="prim">void</b></li>
+        </ul>
+        <hr>
+        <h2>1.0.5 close( ) : <b class="prim">Promise</b>&lt;<b class="prim">void</b>&gt;</h2>
+        <p class="desc">Close (and write on disk) the configuration (it will close the watcher and clean all active observers).</p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
+            <li>Call <span>[[this]]</span>.<a>watcher</a>.<b>isClosed</b>() and let <a>watcherClosed</a> be the result.</li>
+            <li>If <span>[[this]]</span>.<a>autoReloadActivated</a> is equal to <b class="prim">true</b> and <a>watcherClosed</a> is equal to <b class="prim">false</b>, then</li>
+            <ul class="sub">
+                <li><i>Warning !</i>Call <span>[[this]]</span>.<a>watcher</a>.<b>close</b>()</li>
+                <li>Let <span>[[this]]</span>.<a>autoReloadActivated</a> be <b class="prim">false</b></li>
+            </ul>
+            <li>await Call <span>[[this]]</span>.writeOnDisk()</li>
+            <li>Iterate [<a>index</a>, <a>subscriptionObservers</a>] of <span>[[this]]</span>.<a>subscriptionObservers</a></li>
+            <ul class="sub">
+                <li>Call <a>subscriptionObservers</a>.complete()</li>
+                <li>Call <span>[[this]]</span>.<a>subscriptionObservers</a>.<b>splice</b>(<a>index</a>, <b class="prim">1</b>)</li>
+            </ul>
+            <li>Return <b class="prim">void</b></li>
+        </ul>
+        <hr>
+        <h2>10.0.6 observableOf( <a>fieldPath</a> : <b class="prim">string</b> ) : <b class="prim">Observable</b></h2>
+        <p class="desc">Observe a given configuration key with an Observable object!</p>
+        <ul>
+            <li><i>Throw Exception</i>Call <span>[[this]]</span>.get(<a>fieldPath</a>) and let <a>ret</a> be the result.</li>
+            <li>Return <b class="prim">Observable</b>(<a>ret</a>)</li>
+        </ul>
+        <hr>
+        <h2>10.0.7 get payload( ) : <b class="prim">Object</b></h2>
+        <p class="desc">Get a payload Object clone (or null if the configuration has not been read yet)</p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, then</li>
+            <ul class="sub">
+                <li>Return <b>Object</b>(<b class="prim">null</b>)</li>
+            </ul>
+            <li>Call <b>lodash.clonedeep</b>(<span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>)) and let <a>ret</a> be the result</li>
+            <li>Return <a>ret</a></li>
+        </ul>
+        <hr>
+        <h2>10.0.8 set payload( <a>newPayload</a> : <b class="prim">Object</b> ) : <b class="prim">void</b></h2>
+        <p class="desc"></p>
+        <ul>
+            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
+            <li>Unless <b>Type</b>(<a>newPayload</a>) is equal to <b class="string">"Object"</b>, Throw a <b>TypeError</b> exception.</li>
+            <li>Call <b>lodash.clonedeep</b>(<a>newPayload</a>) and let <a>tempPayload</a> be the result</li>
+            <li>If <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"schema"</b>)(<a>tempPayload</a>) is equal to <b class="prim">false</b>, then</li>
+            <ul class="sub">
+                <li>Throw a <b>Error</b> exception</li>
+            </ul>
+            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>) be <a>tempPayload</a></li>
+            <li>Iterate [<a>fieldPath</a>, <a>subscriptionObservers</a>] of <span>[[this]]</span>.<a>subscriptionObservers</a></li>
+            <ul class="sub">
+                <li>Call <span>[[this]]</span>.get(<a>fieldPath</a>) and let <a>next</a> be the result.</li>
+                <li>Call <a>subscriptionObservers</a>.next(<a>next</a>)</li>
+            </ul>
+            <li>Return <b class="prim">void</b></li>
+        </ul>
+    </section>
+</body>
+</html>
