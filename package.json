@@ -31,14 +31,14 @@
   "homepage": "https://github.com/SlimIO/Config#readme",
   "devDependencies": {
     "@escommunity/minami": "^1.0.0",
-    "@slimio/eslint-config": "^1.1.5",
-    "@types/node": "^10.3.4",
+    "@slimio/eslint-config": "^1.1.7",
+    "@types/node": "^10.5.0",
     "ava": "^0.25.0",
-    "eslint": "^4.19.1",
-    "nyc": "^11.6.0"
+    "eslint": "^5.0.1",
+    "nyc": "^11.9.0"
   },
   "dependencies": {
-    "@sindresorhus/is": "^0.8.0",
+    "@sindresorhus/is": "^0.9.0",
     "ajv": "^6.4.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
