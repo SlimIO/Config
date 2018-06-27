@@ -353,10 +353,10 @@ class Config extends events {
      * main().catch(console.error);
      */
     observableOf(fieldPath) {
-        return new Observable((observer) => {
-            // Retrieve the field value first
-            const fieldValue = this.get(fieldPath);
+        // Retrieve the field value first
+        const fieldValue = this.get(fieldPath);
 
+        return new Observable((observer) => {
             // Send it as first Observed value!
             observer.next(fieldValue);
             this.subscriptionObservers.push([fieldPath, observer]);
