@@ -1,4 +1,7 @@
-tests
 .editorconfig
 .eslintrc
+.gitignore
+test
+tests
 docs
+CONTRIBUTING.md
