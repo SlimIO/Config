@@ -100,6 +100,8 @@ class Config extends events {
         this.reloadDelay = options.reloadDelay || 1000;
         this.writeOnSet = options.writeOnSet || false;
         this.configHasBeenRead = false;
+
+        /** @type {Array<[string, ZenObservable.SubscriptionObserver<any>]>} */
         this.subscriptionObservers = [];
 
         // Assign defaultSchema is exist!
@@ -134,7 +136,7 @@ class Config extends events {
      * @public
      * @memberof Config#
      * @member {Object} payload
-     * @param {!Object} newPayload Newest payload to setup
+     * @param {!T} newPayload Newest payload to setup
      * @desc Set a new payload Object
      *
      * @throws {Error}
@@ -165,6 +167,7 @@ class Config extends events {
             throw new TypeError("Config.payload->newPayload should be typeof <Object>");
         }
 
+        /** @type {T} */
         const tempPayload = clonedeep(newPayload);
         if (this[schema](tempPayload) === false) {
             const errors = formatAjvErrors(this[schema].errors);
@@ -204,7 +207,6 @@ class Config extends events {
      * main().catch(console.error);
      */
     async read(defaultPayload) {
-        // Declare scoped variable(s) to the top
         let JSONConfig, JSONSchema;
 
         // Get and parse the JSON Configuration file (if exist).
@@ -253,7 +255,7 @@ class Config extends events {
      * @method setupAutoReload
      * @desc Setup configuration autoReload
      * @memberof Config#
-     * @return {void}
+     * @return {Boolean}
      *
      * @version 0.1.0
      *
@@ -261,13 +263,12 @@ class Config extends events {
      */
     setupAutoReload() {
         if (!this.configHasBeenRead) {
-            // eslint-disable-next-line max-len
             throw new Error("Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!");
         }
 
-        // Return if autoReload is already actived
+        // Return if autoReload is already equal to true.
         if (this.autoReloadActivated) {
-            return;
+            return false;
         }
 
         this.autoReloadActivated = true;
@@ -275,6 +276,8 @@ class Config extends events {
             await this.read();
             this.emit("reload");
         });
+
+        return true;
     }
 
     /**
@@ -306,7 +309,6 @@ class Config extends events {
      */
     get(fieldPath) {
         if (!this.configHasBeenRead) {
-            // eslint-disable-next-line max-len
             throw new Error("Config.get - Unable to get a key, the configuration has not been initialized yet!");
         }
         if (!is.string(fieldPath)) {
@@ -318,11 +320,12 @@ class Config extends events {
 
     /**
      * @public
+     * @template H
      * @method observableOf
      * @desc Observe a given configuration key with an Observable object!
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @memberof Config#
-     * @return {Observable}
+     * @return {ZenObservable.ObservableLike<H>}
      *
      * @version 0.1.0
      *
@@ -353,7 +356,14 @@ class Config extends events {
      * main().catch(console.error);
      */
     observableOf(fieldPath) {
-        // Retrieve the field value first
+        if (!is.string(fieldPath)) {
+            throw new TypeError("Config.observableOf->fieldPath should be typeof <string>");
+        }
+
+        /**
+         * Retrieve the field value first
+         * @type {H}
+         */
         const fieldValue = this.get(fieldPath);
 
         return new Observable((observer) => {
@@ -371,7 +381,7 @@ class Config extends events {
      * @memberof Config#
      * @param {!String} fieldPath Path to the field (separated with dot)
      * @param {!H} fieldValue Field value
-     * @return {Promise<void>}
+     * @return {this}
      *
      * @throws {Error}
      * @throws {TypeError}
@@ -399,7 +409,6 @@ class Config extends events {
      */
     set(fieldPath, fieldValue) {
         if (!this.configHasBeenRead) {
-            // eslint-disable-next-line max-len
             throw new Error("Config.set - Unable to set a key, the configuration has not been initialized yet!");
         }
         if (!is.string(fieldPath)) {
