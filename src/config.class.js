@@ -94,11 +94,11 @@ class Config extends events {
         // Assign default class values
         this[payload] = null;
         this[schema] = null;
-        this.createOnNoEntry = options.createOnNoEntry || false;
-        this.autoReload = options.autoReload || false;
+        this.createOnNoEntry = Boolean(options.createOnNoEntry) || false;
+        this.autoReload = Boolean(options.autoReload) || false;
         this.autoReloadActivated = false;
-        this.reloadDelay = options.reloadDelay || 1000;
-        this.writeOnSet = options.writeOnSet || false;
+        this.reloadDelay = Boolean(options.reloadDelay) || 1000;
+        this.writeOnSet = Boolean(options.writeOnSet) || false;
         this.configHasBeenRead = false;
 
         /** @type {Array<[string, ZenObservable.SubscriptionObserver<any>]>} */
@@ -106,6 +106,9 @@ class Config extends events {
 
         // Assign defaultSchema is exist!
         if (Reflect.has(options, "defaultSchema")) {
+            if (!is.object(options.defaultSchema)) {
+                throw new TypeError("Config.constructor->options defaultSchema should be instanceof Object prototype");
+            }
             this.defaultSchema = options.defaultSchema;
         }
     }
@@ -160,7 +163,6 @@ class Config extends events {
      */
     set payload(newPayload) {
         if (!this.configHasBeenRead) {
-            // eslint-disable-next-line max-len
             throw new Error("Config.payload - cannot set a new payload when the config has not been read yet!");
         }
         if (!is.object(newPayload)) {
@@ -209,14 +211,20 @@ class Config extends events {
     async read(defaultPayload) {
         let JSONConfig, JSONSchema;
 
+        // Verify configFile integrity!
+        if (!is.string(this.configFile)) {
+            throw new TypeError("Config.read - configFile should be typeof <string>");
+        }
+
         // Get and parse the JSON Configuration file (if exist).
         // If he doesn't exist we replace it by the defaultPayload or the precedent loaded payload
         try {
             await access(this.configFile, R_OK | W_OK);
-            JSONConfig = JSON.parse(await readFile(this.configFile));
+            const buf = await readFile(this.configFile);
+            JSONConfig = JSON.parse(buf.toString());
         }
         catch (err) {
-            if (!this.createOnNoEntry || err.code !== "ENOENT") {
+            if (!this.createOnNoEntry || Reflect.has(err, "code") && err.code !== "ENOENT") {
                 throw err;
             }
             JSONConfig = is.object(defaultPayload) ?
@@ -229,10 +237,11 @@ class Config extends events {
         // If he doesn't exist we replace it with a default Schema
         try {
             await access(this.schemaFile, R_OK);
-            JSONSchema = JSON.parse(await readFile(this.schemaFile));
+            const buf = await readFile(this.schemaFile);
+            JSONSchema = JSON.parse(buf.toString());
         }
         catch (err) {
-            if (err.code !== "ENOENT") {
+            if (Reflect.has(err, "code") && err.code !== "ENOENT") {
                 throw err;
             }
             JSONSchema = is.nullOrUndefined(this.defaultSchema) ?
@@ -244,7 +253,13 @@ class Config extends events {
         this.configHasBeenRead = true;
         this.payload = JSONConfig;
         if (this.autoReload) {
-            this.setupAutoReload();
+            try {
+                this.setupAutoReload();
+            }
+            catch (err) {
+                console.log("Failed to setup configuration autoReload");
+                console.error(err);
+            }
         }
 
         return this;
@@ -271,11 +286,12 @@ class Config extends events {
             return false;
         }
 
-        this.autoReloadActivated = true;
-        this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, async() => {
-            await this.read();
-            this.emit("reload");
+        this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, () => {
+            this.read().then(() => {
+                this.emit("reload");
+            }).catch(console.error);
         });
+        this.autoReloadActivated = true;
 
         return true;
     }
