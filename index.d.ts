@@ -1,10 +1,12 @@
-/// <reference types="node" />
-/// <reference types="zen-obserables" />
+/// <reference types="@types/node" />
+/// <reference types="@types/zen-observable" />
+
+import * as events from "events";
 
 /**
  * Config class definition
  */
-declare class Config<T> extends event {
+declare class Config<T> extends events.EventEmitter {
     // Constructor
     constructor(configFilePath: string, options?: Config.ConstructorOptions);
 
@@ -17,7 +19,7 @@ declare class Config<T> extends event {
     public autoReloadActivated: boolean;
     public reloadDelay: number;
     public configHasBeenRead: boolean;
-    public subscriptionObservers: Array<Array<string, ZenObservable.SubscriptionObserver<any>>>;
+    public subscriptionObservers: Array<[string, ZenObservable.SubscriptionObserver<any>]>;
     public payload: T;
     public defaultSchema: object;
 
@@ -26,10 +28,10 @@ declare class Config<T> extends event {
 
     // Methods
     public read(defaultPayload?: T): Promise<this>;
-    public setupAutoReload(): void;
+    public setupAutoReload(): boolean;
     public get<H>(fieldPath: string): H;
     public set<H>(fieldPath: string, fieldValue: H): void;
-    public observableOf(fieldPath: string): ZenObservable.ObservableLike;
+    public observableOf<H>(fieldPath: string): ZenObservable.ObservableLike<H>;
     public writeOnDisk(): Promise<void>;
     public close(): Promise<void>;
 }
