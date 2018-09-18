@@ -197,6 +197,20 @@ avaTest("Constructor throw error 'configFilePath - file extension should be .jso
     test.is(error.message, "Config.constructor->configFilePath - file extension should be .json");
 });
 
+avaTest("Constructor throw error 'options should be instanceof Object prototype'", (test) => {
+    const error = test.throws(() => {
+        new Config("./test.json", 150);
+    }, Error);
+    test.is(error.message, "Config.constructor->options should be instanceof Object prototype");
+});
+
+avaTest("Constructor throw error 'defaultSchema should be instanceof Object prototype'", (test) => {
+    const error = test.throws(() => {
+        new Config("./test.json", { defaultSchema: 150 });
+    }, Error);
+    test.is(error.message, "Config.constructor->options defaultSchema should be instanceof Object prototype");
+});
+
 avaTest("Constructor .schema default config file", (test) => {
     const config = new Config("./test/config.schema.json");
     configTypeChecker(test, config);
