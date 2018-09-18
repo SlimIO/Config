@@ -494,8 +494,7 @@ class Config extends events {
         }
 
         // Close sys hook watcher
-        const watcherIsClosed = Boolean(this.watcher.isClosed());
-        if (this.autoReloadActivated && !watcherIsClosed) {
+        if (this.autoReloadActivated) {
             this.watcher.close();
             this.autoReloadActivated = false;
         }
