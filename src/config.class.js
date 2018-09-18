@@ -253,13 +253,7 @@ class Config extends events {
         this.configHasBeenRead = true;
         this.payload = JSONConfig;
         if (this.autoReload) {
-            try {
-                this.setupAutoReload();
-            }
-            catch (err) {
-                console.log("Failed to setup configuration autoReload");
-                console.error(err);
-            }
+            this.setupAutoReload();
         }
 
         return this;
