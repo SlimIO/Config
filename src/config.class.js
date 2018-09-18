@@ -80,6 +80,9 @@ class Config extends events {
         if (!is.string(configFilePath)) {
             throw new TypeError("Config.constructor->configFilePath should be typeof <string>");
         }
+        if (!is.plainObject(options)) {
+            throw new TypeError("Config.constructor->options should be instanceof Object prototype");
+        }
 
         // Parse file and get the extension, name, dirname etc...
         const { dir, name, ext } = parse(configFilePath);
