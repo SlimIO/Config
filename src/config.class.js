@@ -80,7 +80,7 @@ class Config extends events {
         if (!is.string(configFilePath)) {
             throw new TypeError("Config.constructor->configFilePath should be typeof <string>");
         }
-        if (!is.plainObject(options)) {
+        if (!is.nullOrUndefined(options) && !is.plainObject(options)) {
             throw new TypeError("Config.constructor->options should be instanceof Object prototype");
         }
 
