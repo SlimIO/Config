@@ -106,7 +106,7 @@ class Config extends events {
 
         // Assign defaultSchema is exist!
         if (Reflect.has(options, "defaultSchema")) {
-            if (!is.object(options.defaultSchema)) {
+            if (!is.plainObject(options.defaultSchema)) {
                 throw new TypeError("Config.constructor->options defaultSchema should be instanceof Object prototype");
             }
             this.defaultSchema = options.defaultSchema;
