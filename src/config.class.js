@@ -92,7 +92,7 @@ class Config extends events {
             `${dir}/${name}.schema${ext}`;
 
         // Assign default class values
-        this[payload] = null;
+        this[payload] = Object.create(null);
         this[schema] = null;
         this.createOnNoEntry = Boolean(options.createOnNoEntry) || false;
         this.autoReload = Boolean(options.autoReload) || false;
@@ -128,10 +128,6 @@ class Config extends events {
      * console.log(JSON.stringify(configContent, null, 2));
      */
     get payload() {
-        if (!this.configHasBeenRead) {
-            return Object.create(null);
-        }
-
         return clonedeep(this[payload]);
     }
 
@@ -209,7 +205,10 @@ class Config extends events {
      * main().catch(console.error);
      */
     async read(defaultPayload) {
-        let JSONConfig, JSONSchema;
+        /** @type {T} */
+        let JSONConfig;
+        /** @type {Object} */
+        let JSONSchema;
 
         // Verify configFile integrity!
         if (!is.string(this.configFile)) {
@@ -230,7 +229,8 @@ class Config extends events {
             JSONConfig = is.object(defaultPayload) ?
                 defaultPayload :
                 is.nullOrUndefined(this[payload]) ? Object.create(null) : this.payload;
-            await writeFile(this.configFile, JSON.stringify(JSONConfig, null, 4));
+            const configStr = JSON.stringify(JSONConfig, null, 4);
+            await writeFile(this.configFile, configStr);
         }
 
         // Get and parse the JSON Schema file (only if he exist).
@@ -286,7 +286,8 @@ class Config extends events {
             return false;
         }
 
-        this.watcher = watcher(this.configFile, { delay: this.reloadDelay }, () => {
+        const watcherOptions = { delay: this.reloadDelay };
+        this.watcher = watcher(this.configFile, watcherOptions, () => {
             this.read().then(() => {
                 this.emit("reload");
             }).catch(console.error);
@@ -491,7 +492,10 @@ class Config extends events {
         if (!this.configHasBeenRead) {
             throw new Error("Config.close - Cannot close unreaded configuration");
         }
-        if (this.autoReloadActivated && !this.watcher.isClosed()) {
+
+        // Close sys hook watcher
+        const watcherIsClosed = Boolean(this.watcher.isClosed());
+        if (this.autoReloadActivated && !watcherIsClosed) {
             this.watcher.close();
             this.autoReloadActivated = false;
         }
@@ -502,7 +506,7 @@ class Config extends events {
         // Complete all observers
         for (const [index, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.complete();
-            this.subscriptionObservers.splice(index, 1);
+            // this.subscriptionObservers.splice(index, 1);
         }
         this.configHasBeenRead = false;
     }

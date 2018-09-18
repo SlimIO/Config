@@ -29,11 +29,15 @@ li + li {
     margin-top: 5px;
 }
 
+html, body {
+    background: #37474F;
+}
+
 body {
     font-family: 'Fira Mono', monospace;
     padding: 20px;
     padding-bottom: 50px;
-    color: #333;
+    color: #ECEFF1;
 }
 
 hr {
@@ -42,7 +46,7 @@ hr {
     display:block;
     width: 100%;
     height: 12px;
-    border-bottom: 1px dashed #ccc;
+    border-bottom: 1px dashed #607D8B;
 }
 
 h1 {
@@ -53,26 +57,28 @@ h2 {
 }
 
 a {
-    color: #00796B;
+    color: #1DE9B6;
     font-weight: bold;
     cursor: pointer;
 }
 
 span {
-    color: #1c4587;
+    color: #18FFFF;
     font-weight: bold;
 }
 
 b {
-    color: #37474F;
+    color: #FAFAFA;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.15);
 }
 
 b.string {
-    color: #7f6000;
+    color: #FFD740;
+    font-weight: 400;
 }
 
 b.prim {
-    color: #880E4F;
+    color: #FF4081;
 }
 
 i {
@@ -88,8 +94,8 @@ i {
 p.desc {
     margin-bottom: 10px;
     font-weight: bold;
-    color: #37474F;
-    border-bottom: 2px solid #EEE;
+    color: #CFD8DC;
+    border-bottom: 2px solid #546E7A;
     padding-bottom: 5px;
 }
 
@@ -112,7 +118,7 @@ section.tab {
 section.note {
     min-height: 30px;
     padding: 10px;
-    border-left: 10px solid #E1E1E1;
+    border-left: 10px solid #546E7A;
     display: flex;
     align-items: center;
     margin-top: 10px;
@@ -123,5 +129,5 @@ section.note {
         min-width: 150px;
     }
     section.note > p {
-        color: #757575;
+        color: #B0BEC5;
     }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
-    <link href="./style.css" rel="stylesheet">
+    <link href="./black.css" rel="stylesheet">
     <title>Config specification</title>
 </head>
 <body>
@@ -225,7 +225,7 @@
         </ul>
         <hr>
         <h2>10.0.8 set payload( <a>newPayload</a> : <b class="prim">Object</b> ) : <b class="prim">void</b></h2>
-        <p class="desc"></p>
+        <p class="desc">Set a new payload Object</p>
         <ul>
             <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
             <li>Unless <b>Type</b>(<a>newPayload</a>) is equal to <b class="string">"Object"</b>, Throw a <b>TypeError</b> exception.</li>
