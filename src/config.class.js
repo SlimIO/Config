@@ -100,7 +100,7 @@ class Config extends events {
         this.createOnNoEntry = Boolean(options.createOnNoEntry) || false;
         this.autoReload = Boolean(options.autoReload) || false;
         this.autoReloadActivated = false;
-        this.reloadDelay = Boolean(options.reloadDelay) || 1000;
+        this.reloadDelay = is.number(options.reloadDelay) ? options.reloadDelay : 500;
         this.writeOnSet = Boolean(options.writeOnSet) || false;
         this.configHasBeenRead = false;
 
