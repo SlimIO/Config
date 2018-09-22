@@ -78,7 +78,7 @@ function configTypeChecker(test, config, checkInitConfig = false) {
         test.is(config.createOnNoEntry, false);
         test.is(config.autoReload, false);
         test.is(config.autoReloadActivated, false);
-        test.is(config.reloadDelay, 1000);
+        test.is(config.reloadDelay, 500);
         test.is(config.writeOnSet, false);
         test.is(config.configHasBeenRead, false);
         test.deepEqual(config.subscriptionObservers, []);
@@ -103,6 +103,21 @@ avaTest("Basic defaultSchema", async(test) => {
     test.is(is(config.payload.foo), "string");
     test.is(config.payload.foo, "world!");
     await config.close();
+});
+
+avaTest("Non default properties checker", async(test) => {
+    const options = {
+        createOnNoEntry: true,
+        autoReload: true,
+        reloadDelay: 500,
+        writeOnSet: true
+    };
+    const { config } = await createFiles(options);
+    configTypeChecker(test, config, false);
+    test.is(config.createOnNoEntry, true);
+    test.is(config.autoReload, true);
+    test.is(config.reloadDelay, 500);
+    test.is(config.writeOnSet, true);
 });
 
 avaTest("AutoReload by set", async(test) => {
