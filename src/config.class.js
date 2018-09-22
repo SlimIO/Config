@@ -97,11 +97,11 @@ class Config extends events {
         // Assign default class values
         this[payload] = Object.create(null);
         this[schema] = null;
-        this.createOnNoEntry = Boolean(options.createOnNoEntry) || false;
-        this.autoReload = Boolean(options.autoReload) || false;
+        this.createOnNoEntry = is.boolean(options.createOnNoEntry) ? options.createOnNoEntry : false;
+        this.autoReload = is.boolean(options.autoReload) ? options.autoReload : false;
         this.autoReloadActivated = false;
         this.reloadDelay = is.number(options.reloadDelay) ? options.reloadDelay : 500;
-        this.writeOnSet = Boolean(options.writeOnSet) || false;
+        this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
         this.configHasBeenRead = false;
 
         /** @type {Array<[string, ZenObservable.SubscriptionObserver<any>]>} */
