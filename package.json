@@ -31,6 +31,7 @@
   "homepage": "https://github.com/SlimIO/Config#readme",
   "devDependencies": {
     "@escommunity/minami": "^1.0.0",
+    "@sindresorhus/is": "^0.11.0",
     "@slimio/eslint-config": "^1.1.7",
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/lodash.get": "^4.4.4",
@@ -42,7 +43,7 @@
     "nyc": "^13.0.1"
   },
   "dependencies": {
-    "@sindresorhus/is": "^0.11.0",
+    "@slimio/is": "^1.0.0",
     "ajv": "^6.5.3",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",

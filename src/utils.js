@@ -3,7 +3,7 @@
  */
 
 // Require third-party NPM package(s)
-const is = require("@sindresorhus/is");
+const is = require("@slimio/is");
 
 /**
  * @exports utils/formatAjvErrors

@@ -56,7 +56,7 @@ async function createFiles(options = {}) {
     );
     await writeFile(
         `./test/config${num}.json`,
-        JSON.stringify(configJSON, null, 4)
+        JSON.stringify(is.plainObject(options.customJSON) ? options.customJSON : configJSON, null, 4)
     );
 
     return {
@@ -341,7 +341,7 @@ avaTest("Zero configuration without createOnNoEntry", async(test) => {
     test.is(is(error.syscall), "string");
     test.is(error.errno, -4058);
     test.is(error.code, "ENOENT");
-    test.is(error.syscall, "access");
+    test.is(error.syscall, "open");
 });
 
 avaTest("Read deafault payload", async(test) => {
@@ -362,6 +362,10 @@ avaTest("Reasign default payload", async(test) => {
     const config = new Config("./test/basicConfig4.json", options);
     configTypeChecker(test, config);
     await config.read(configJSON);
+    await new Promise((resolve, reject) => {
+        config.on("configWrited", resolve);
+        config.on("error", reject);
+    });
     await unlink("./test/basicConfig4.json");
     await config.read();
     await config.close();

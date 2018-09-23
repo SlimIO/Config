@@ -1,18 +1,11 @@
 // Require Node.JS core packages
 const { parse, extname } = require("path");
+const { readFile, writeFile } = require("fs").promises;
 const events = require("events");
-const {
-    promises: {
-        access,
-        readFile,
-        writeFile
-    },
-    constants: { R_OK, W_OK }
-} = require("fs");
 
 // Require Third-party NPM package(s)
 const watcher = require("node-watch");
-const is = require("@sindresorhus/is");
+const is = require("@slimio/is");
 const ajv = new (require("ajv"))({ useDefaults: "shared" });
 const get = require("lodash.get");
 const clonedeep = require("lodash.clonedeep");
@@ -164,7 +157,7 @@ class Config extends events {
         if (!this.configHasBeenRead) {
             throw new Error("Config.payload - cannot set a new payload when the config has not been read yet!");
         }
-        if (!is.object(newPayload)) {
+        if (!is.plainObject(newPayload)) {
             throw new TypeError("Config.payload->newPayload should be typeof <Object>");
         }
 
@@ -212,38 +205,41 @@ class Config extends events {
         let JSONConfig;
         /** @type {Object} */
         let JSONSchema;
+        let writeOnDisk = false;
 
         // Verify configFile integrity!
         if (!is.string(this.configFile)) {
             throw new TypeError("Config.read - configFile should be typeof <string>");
         }
 
-        // Get and parse the JSON Configuration file (if exist).
+        // Get and parse the JSON Configuration file (if exist, else it will throw ENOENT).
         // If he doesn't exist we replace it by the defaultPayload or the precedent loaded payload
         try {
-            await access(this.configFile, R_OK | W_OK);
-            const buf = await readFile(this.configFile);
-            JSONConfig = JSON.parse(buf.toString());
+            const str = await readFile(this.configFile, { encoding: "utf8" });
+            JSONConfig = JSON.parse(str);
         }
         catch (err) {
+            // If NodeJS Code is different from "ENOENTRY", then throw Error (only if createOnNoEntry is equal to false)
             if (!this.createOnNoEntry || Reflect.has(err, "code") && err.code !== "ENOENT") {
                 throw err;
             }
-            JSONConfig = is.object(defaultPayload) ?
+
+            JSONConfig = is.plainObject(defaultPayload) ?
                 defaultPayload :
-                is.nullOrUndefined(this[payload]) ? Object.create(null) : this.payload;
-            const configStr = JSON.stringify(JSONConfig, null, 4);
-            await writeFile(this.configFile, configStr);
+                is.nullOrUndefined(this[payload]) ? Object.create(null) : this[payload];
+
+            // Ask to write the configuration to the disk at the end..
+            writeOnDisk = true;
         }
 
         // Get and parse the JSON Schema file (only if he exist).
         // If he doesn't exist we replace it with a default Schema
         try {
-            await access(this.schemaFile, R_OK);
-            const buf = await readFile(this.schemaFile);
-            JSONSchema = JSON.parse(buf.toString());
+            const str = await readFile(this.schemaFile, { encoding: "utf8" });
+            JSONSchema = JSON.parse(str);
         }
         catch (err) {
+            // If NodeJS Code is different from "ENOENTRY", then throw Error
             if (Reflect.has(err, "code") && err.code !== "ENOENT") {
                 throw err;
             }
@@ -252,12 +248,28 @@ class Config extends events {
                 this.defaultSchema;
         }
 
+        // Setup Schema
         this[schema] = ajv.compile(JSONSchema);
+
+        // Setup config state has "read" true
         this.configHasBeenRead = true;
-        this.payload = JSONConfig;
-        if (this.autoReload) {
-            this.setupAutoReload();
+
+        // Setup final payload
+        try {
+            this.payload = JSONConfig;
         }
+        catch (error) {
+            this.configHasBeenRead = false;
+            throw error;
+        }
+
+        // Write the configuraton on the disk for the first time (if there is no one available!).
+        if (writeOnDisk) {
+            this.lazyWriteOnDisk();
+        }
+
+        // If autoReload is request, then setup it now!
+        this.setupAutoReload();
 
         return this;
     }
@@ -279,7 +291,7 @@ class Config extends events {
         }
 
         // Return if autoReload is already equal to true.
-        if (this.autoReloadActivated) {
+        if (!this.autoReload || this.autoReloadActivated) {
             return false;
         }
 
@@ -338,6 +350,7 @@ class Config extends events {
      * @method observableOf
      * @desc Observe a given configuration key with an Observable object!
      * @param {!String} fieldPath Path to the field (separated with dot)
+     * @param {!Number} [depth=Infinity] Retrieved value depth!
      * @memberof Config#
      * @return {ZenObservable.ObservableLike<H>}
      *
@@ -369,7 +382,7 @@ class Config extends events {
      * }
      * main().catch(console.error);
      */
-    observableOf(fieldPath) {
+    observableOf(fieldPath, depth = Infinity) {
         if (!is.string(fieldPath)) {
             throw new TypeError("Config.observableOf->fieldPath should be typeof <string>");
         }
@@ -379,6 +392,9 @@ class Config extends events {
          * @type {H}
          */
         const fieldValue = this.get(fieldPath);
+        if (Number.isFinite(depth)) {
+            // TODO: Work depth
+        }
 
         return new Observable((observer) => {
             // Send it as first Observed value!
@@ -434,9 +450,7 @@ class Config extends events {
 
         // If writeOnSet option is actived, writeOnDisk at the next loop iteration (lazy)
         if (this.writeOnSet) {
-            setImmediate(() => {
-                this.writeOnDisk().catch(console.error);
-            });
+            this.lazyWriteOnDisk();
         }
 
         return this;
@@ -466,14 +480,39 @@ class Config extends events {
             throw new Error("Config.writeOnDisk - Cannot write unreaded configuration on the disk");
         }
 
-        await access(this.configFile, W_OK);
-        await writeFile(this.configFile, JSON.stringify(this[payload], null, 4));
+        await writeFile(this.configFile, JSON.stringify(this[payload], null, Config.STRINGIFY_SPACE));
 
         /**
          * @event configWrited
          * @type {void}
          */
         this.emit("configWrited");
+    }
+
+    /**
+     * @public
+     * @method lazyWriteOnDisk
+     * @desc lazy Write Configuration (write the configuration at the next loop iteration)
+     * @memberof Config#
+     * @returns {void}
+     *
+     * @throws {Error}
+     *
+     * @version 0.5.0
+     */
+    lazyWriteOnDisk() {
+        if (!this.configHasBeenRead) {
+            throw new Error("Config.lazyWriteOnDisk - Cannot lazy write unreaded configuration on the disk");
+        }
+
+        setImmediate(async() => {
+            try {
+                await this.writeOnDisk();
+            }
+            catch (error) {
+                this.emit("error", error);
+            }
+        });
     }
 
     /**
@@ -497,17 +536,17 @@ class Config extends events {
             throw new Error("Config.close - Cannot close unreaded configuration");
         }
 
+        // Write the Configuration on the disk to be safe
+        await this.writeOnDisk();
+
         // Close sys hook watcher
         if (this.autoReloadActivated) {
             this.watcher.close();
             this.autoReloadActivated = false;
         }
 
-        // Write the Configuration on the disk to be safe
-        await this.writeOnDisk();
-
         // Complete all observers
-        for (const [index, subscriptionObservers] of this.subscriptionObservers) {
+        for (const [, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.complete();
             // this.subscriptionObservers.splice(index, 1);
         }
@@ -515,6 +554,9 @@ class Config extends events {
     }
 
 }
+
+// Default JSON SPACE INDENTATION
+Config.STRINGIFY_SPACE = 4;
 
 // Default JSON Schema!
 Config.DEFAULTSchema = {
