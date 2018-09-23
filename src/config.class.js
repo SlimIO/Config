@@ -450,6 +450,7 @@ class Config extends events {
      * @returns {Promise<void>}
      *
      * @throws {Error}
+     * @fires configWrited
      *
      * @version 0.1.0
      *
@@ -467,6 +468,12 @@ class Config extends events {
 
         await access(this.configFile, W_OK);
         await writeFile(this.configFile, JSON.stringify(this[payload], null, 4));
+
+        /**
+         * @event configWrited
+         * @type {void}
+         */
+        this.emit("configWrited");
     }
 
     /**
