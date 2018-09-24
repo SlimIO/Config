@@ -4,7 +4,16 @@
     "properties": {
         "foo": {
             "type": "string"
+        },
+        "test": {
+            "type": "string",
+            "default": "hello world!"
+        },
+        "bar": {
+            "type": "number"
         }
     },
-    "required": ["foo"]
+    "required": [
+        "foo"
+    ]
 }

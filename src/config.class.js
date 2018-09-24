@@ -1,5 +1,5 @@
 // Require Node.JS core packages
-const { parse, extname } = require("path");
+const { parse, join } = require("path");
 const { readFile, writeFile } = require("fs").promises;
 const events = require("events");
 
@@ -83,9 +83,7 @@ class Config extends events {
             throw new Error("Config.constructor->configFilePath - file extension should be .json");
         }
         this.configFile = configFilePath;
-        this.schemaFile = extname(name) === ".schema" ?
-            `${dir}/${name}${ext}` :
-            `${dir}/${name}.schema${ext}`;
+        this.schemaFile = `${join(dir, name)}.schema.json`;
 
         // Assign default class values
         this[payload] = Object.create(null);
@@ -228,9 +226,7 @@ class Config extends events {
                 throw err;
             }
 
-            JSONConfig = defaultPayload ?
-                defaultPayload :
-                is.nullOrUndefined(this[payload]) ? Object.create(null) : this[payload];
+            JSONConfig = defaultPayload ? defaultPayload : this[payload];
 
             // Ask to write the configuration to the disk at the end..
             writeOnDisk = true;
@@ -514,6 +510,7 @@ class Config extends events {
                 await this.writeOnDisk();
             }
             catch (error) {
+                /* istanbul ignore next */
                 this.emit("error", error);
             }
         });

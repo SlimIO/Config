@@ -13,29 +13,9 @@ const is = require("@slimio/is");
 const Config = require("../src/config.class");
 const { formatAjvErrors } = require("../src/utils.js");
 
-// DEFAULT SCHEMA
-const configSchemaJSON = {
-    title: "Config",
-    type: "object",
-    properties: {
-        foo: {
-            type: "string"
-        },
-        test: {
-            type: "string",
-            default: "hello world!"
-        },
-        bar: {
-            type: "number"
-        }
-    },
-    required: ["foo"]
-};
-
-// DEFAULT JSON PAYLOAD
-const jsonPayload = {
-    foo: "world!"
-};
+// LOAD SCHEMA & DEFAULT CONFIG PAYLOAD
+const configSchemaJSON = require("./config.schema.json");
+const jsonPayload = require("./config.json");
 
 // ENSURE EVERY THINGS IS CLEAR ON LOCAL DISK
 let count = 0;
@@ -56,10 +36,9 @@ async function createNewConfiguration(options = Object.create(null)) {
     const num = ++count;
     const schemaName = `./test/config${num}.schema.json`;
     const configName = `./test/config${num}.json`;
-    const configJSON = is.plainObject(options.customJSON) ? options.customJSON : jsonPayload;
     await Promise.all([
         writeFile(schemaName, JSON.stringify(configSchemaJSON)),
-        writeFile(configName, JSON.stringify(configJSON))
+        writeFile(configName, JSON.stringify(jsonPayload))
     ]);
 
     return { num, config: new Config(configName, options) };
@@ -329,6 +308,32 @@ avaTest("Read a config with a default Payload", async(assert) => {
     await config.close();
 });
 
+avaTest("Read a corrupted json", async(assert) => {
+    const config = new Config(join(__dirname, "corrupted.json"), {
+        createOnNoEntry: false,
+        defaultSchema: configSchemaJSON
+    });
+
+    const error = await assert.throws(config.read(), Error);
+    assert.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
+    assert.deepEqual(config.payload, Object.create(null));
+    assert.is(config.configHasBeenRead, false);
+});
+
+avaTest("Read config with no default payload", async(assert) => {
+    const cfgPath = join(__dirname, "noDataPayload.json");
+    const config = new Config(cfgPath, {
+        createOnNoEntry: true
+    });
+    CFG_TO_CLEAR.push(cfgPath);
+
+    await config.read();
+    assert.true(is.plainObject(config.payload));
+    assert.deepEqual(config.payload, Object.create(null));
+
+    await config.close();
+});
+
 avaTest("Reasign default payload", async(assert) => {
     const cfgPath = join(__dirname, "reRead.json");
     const config = new Config(cfgPath, {
@@ -462,20 +467,57 @@ avaTest("Set a new value and writeOnDisk manually", async(assert) => {
     assert.is(config.payload.foo, "yopyop");
 });
 
+avaTest("Read defaultPayload should be a plainObject (if not undefined)", async(assert) => {
+    const { config } = await createNewConfiguration();
+    assertConfigTypesAndValues(assert, config);
+
+    const error = await assert.throws(config.read(10), TypeError);
+    assert.is(error.message, "defaultPayload argument should be a plain JavaScript Object!");
+});
+
+avaTest("Re-write configFile property after Config construction", async(assert) => {
+    const { config } = await createNewConfiguration();
+    assertConfigTypesAndValues(assert, config);
+    config.configFile = undefined;
+
+    const error = await assert.throws(config.read(), TypeError);
+    assert.is(error.message, "Config.read - configFile should be typeof <string>");
+});
+
 avaTest("Write on disk error before read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = await assert.throws(config.writeOnDisk());
+    const error = await assert.throws(config.writeOnDisk(), Error);
     assert.is(error.message, "Config.writeOnDisk - Cannot write unreaded configuration on the disk");
+});
+
+avaTest("observableOf fieldPath should be a string!", async(assert) => {
+    const { config } = await createNewConfiguration();
+    assertConfigTypesAndValues(assert, config);
+
+    const error = assert.throws(() => {
+        config.observableOf(10);
+    }, TypeError);
+    assert.is(error.message, "Config.observableOf->fieldPath should be typeof <string>");
 });
 
 avaTest("Can't close config if read has not been triggered before!", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = await assert.throws(config.close());
+    const error = await assert.throws(config.close(), Error);
     assert.is(error.message, "Config.close - Cannot close unreaded configuration");
+});
+
+avaTest("Can't lazyWriteDisk if config has not been read", async(assert) => {
+    const { config } = await createNewConfiguration();
+    assertConfigTypesAndValues(assert, config);
+
+    const error = assert.throws(() => {
+        config.lazyWriteOnDisk();
+    }, Error);
+    assert.is(error.message, "Config.lazyWriteOnDisk - Cannot lazy write unreaded configuration on the disk");
 });
 
 avaTest("Config set invalid value", async(assert) => {
