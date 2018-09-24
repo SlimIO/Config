@@ -201,6 +201,10 @@ class Config extends events {
      * main().catch(console.error);
      */
     async read(defaultPayload) {
+        if (!is.nullOrUndefined(defaultPayload) && !is.plainObject(defaultPayload)) {
+            throw new TypeError("defaultPayload argument should be a plain JavaScript Object!");
+        }
+
         /** @type {T} */
         let JSONConfig;
         /** @type {Object} */
@@ -224,7 +228,7 @@ class Config extends events {
                 throw err;
             }
 
-            JSONConfig = is.plainObject(defaultPayload) ?
+            JSONConfig = defaultPayload ?
                 defaultPayload :
                 is.nullOrUndefined(this[payload]) ? Object.create(null) : this[payload];
 
@@ -546,9 +550,9 @@ class Config extends events {
         }
 
         // Complete all observers
-        for (const [, subscriptionObservers] of this.subscriptionObservers) {
+        for (const [index, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.complete();
-            // this.subscriptionObservers.splice(index, 1);
+            this.subscriptionObservers.splice(index, 1);
         }
         this.configHasBeenRead = false;
     }
