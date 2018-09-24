@@ -393,7 +393,7 @@ class Config extends events {
          */
         const fieldValue = this.get(fieldPath);
         if (Number.isFinite(depth)) {
-            // TODO: Work depth
+            throw new Error("ObservableOf depth is not implemented yet!");
         }
 
         return new Observable((observer) => {
