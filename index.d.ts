@@ -31,8 +31,9 @@ declare class Config<T> extends events.EventEmitter {
     public setupAutoReload(): boolean;
     public get<H>(fieldPath: string): H;
     public set<H>(fieldPath: string, fieldValue: H): void;
-    public observableOf<H>(fieldPath: string): ZenObservable.ObservableLike<H>;
+    public observableOf<H>(fieldPath: string, depth?: number): ZenObservable.ObservableLike<H>;
     public writeOnDisk(): Promise<void>;
+    public lazyWriteOnDisk(): void;
     public close(): Promise<void>;
 }
 
