@@ -296,10 +296,14 @@ class Config extends events {
         }
 
         const watcherOptions = { delay: this.reloadDelay };
-        this.watcher = watcher(this.configFile, watcherOptions, () => {
-            this.read().then(() => {
+        this.watcher = watcher(this.configFile, watcherOptions, async() => {
+            try {
+                await this.read();
                 this.emit("reload");
-            }).catch(console.error);
+            }
+            catch (err) {
+                this.emit("error", err);
+            }
         });
         this.autoReloadActivated = true;
 
