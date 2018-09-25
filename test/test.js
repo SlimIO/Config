@@ -265,7 +265,7 @@ avaTest("Zero configuration (with createOnNoEntry equal true)", async(assert) =>
     await config.read();
     await new Promise((resolve, reject) => {
         const tOut = setTimeout(reject, 1000);
-        config.on("configWrited", () => {
+        config.on("configWritten", () => {
             clearTimeout(tOut);
             resolve();
         });
@@ -296,7 +296,7 @@ avaTest("Read a config with a default Payload", async(assert) => {
     await config.read(defaultPayload);
     await new Promise((resolve, reject) => {
         const tOut = setTimeout(reject, 1000);
-        config.on("configWrited", () => {
+        config.on("configWritten", () => {
             clearTimeout(tOut);
             resolve();
         });
@@ -344,7 +344,7 @@ avaTest("Reasign default payload", async(assert) => {
     await config.read(jsonPayload);
     await new Promise((resolve, reject) => {
         const tOut = setTimeout(reject, 1000);
-        config.on("configWrited", () => {
+        config.on("configWritten", () => {
             clearTimeout(tOut);
             resolve();
         });
@@ -356,7 +356,7 @@ avaTest("Reasign default payload", async(assert) => {
     assert.deepEqual(config.payload, jsonPayload);
     await new Promise((resolve, reject) => {
         const tOut = setTimeout(reject, 1000);
-        config.on("configWrited", () => {
+        config.on("configWritten", () => {
             clearTimeout(tOut);
             resolve();
         });
@@ -441,7 +441,7 @@ avaTest("Write on set", async(assert) => {
 
     await new Promise((resolve, reject) => {
         const tOut = setTimeout(reject, 1000);
-        config.on("configWrited", () => {
+        config.on("configWritten", () => {
             clearTimeout(tOut);
             resolve();
         });
@@ -457,7 +457,7 @@ avaTest("Set a new value and writeOnDisk manually", async(assert) => {
     await config.read();
     assert.is(config.payload.foo, "world!");
     config.set("foo", "yopyop");
-    config.on("configWrited", () => {
+    config.on("configWritten", () => {
         assert.pass();
     });
     await config.writeOnDisk();

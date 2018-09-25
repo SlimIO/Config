@@ -490,7 +490,7 @@ class Config extends events {
          * @event configWrited
          * @type {void}
          */
-        this.emit("configWrited");
+        this.emit("configWritten");
     }
 
     /**
