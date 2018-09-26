@@ -467,6 +467,37 @@ avaTest("Set a new value and writeOnDisk manually", async(assert) => {
     assert.is(config.payload.foo, "yopyop");
 });
 
+avaTest("Read a config with noEntry and wait for watcherInitializer", async(assert) => {
+    assert.plan(4);
+    const cfgPath = join(__dirname, "watcherDelay.json");
+    const config = new Config(cfgPath, {
+        createOnNoEntry: true,
+        reloadDelay: 100,
+        autoReload: true
+    });
+    CFG_TO_CLEAR.push(cfgPath);
+
+    config.once("configWritten", () => {
+        assert.pass();
+    });
+    config.once("watcherInitialized", () => {
+        assert.pass();
+    });
+    await config.read();
+
+    // wait 250ms
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    config.once("reload", () => {
+        assert.pass();
+    });
+    await writeFile(cfgPath, JSON.stringify({ hey: "oh" }));
+
+    // wait 500ms
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    assert.is(config.payload.hey, "oh");
+    await config.close();
+});
+
 avaTest("Read defaultPayload should be a plainObject (if not undefined)", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
