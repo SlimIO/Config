@@ -33,7 +33,7 @@ const schema = Symbol("schema");
  * @property {Boolean} writeOnSet
  * @property {Boolean} configHasBeenRead Know if the configuration has been read at least one time
  * @property {Boolean} autoReloadActivated Know if the autoReload is Enabled or Disabled
- * @property {Array} subscriptionObservers
+ * @property {Array<Array.<string, ZenObservable.SubscriptionObserver<any>>>} subscriptionObservers
  * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
  * @property {Object} defaultSchema
  *
@@ -95,7 +95,7 @@ class Config extends events {
         this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
         this.configHasBeenRead = false;
 
-        /** @type {Array<[string, ZenObservable.SubscriptionObserver<any>]>} */
+        /** @type {Array<Array.<string, ZenObservable.SubscriptionObserver<any>>>} */
         this.subscriptionObservers = [];
 
         // Assign defaultSchema is exist!
