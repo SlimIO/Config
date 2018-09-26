@@ -287,6 +287,10 @@ class Config extends events {
      * @memberof Config#
      * @return {Boolean}
      *
+     * @fires watcherInitialized
+     * @fires reload
+     * @fires error
+     *
      * @version 0.1.0
      *
      * @throws {Error}
@@ -312,6 +316,12 @@ class Config extends events {
             }
         });
         this.autoReloadActivated = true;
+
+        /**
+         * @event watcherInitialized
+         * @type {void}
+         */
+        this.emit("watcherInitialized");
 
         return true;
     }
