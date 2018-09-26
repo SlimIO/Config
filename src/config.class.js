@@ -45,6 +45,8 @@ const schema = Symbol("schema");
 class Config extends events {
 
     /**
+     * @version 0.1.0
+     *
      * @constructor
      * @param {!String} configFilePath Absolute path to the configuration file
      * @param {Object} [options={}] Config options
@@ -56,8 +58,6 @@ class Config extends events {
      *
      * @throws {TypeError}
      * @throws {Error}
-     *
-     * @version 0.1.0
      *
      * @example
      * const cfgOptions = {
@@ -108,12 +108,12 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @memberof Config#
      * @member {Object} payload
      * @desc Get a payload Object clone (or null if the configuration has not been read yet)
-     *
-     * @version 0.1.0
      *
      * @example
      * const cfg = new Config("./path/to/config.json");
@@ -126,6 +126,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @memberof Config#
      * @member {Object} payload
@@ -134,8 +136,6 @@ class Config extends events {
      *
      * @throws {Error}
      * @throws {TypeError}
-     *
-     * @version 0.1.0
      *
      * @example
      * const cfg = new Config("./path/to/config.json");
@@ -174,6 +174,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @async
      * @method read
@@ -181,8 +183,6 @@ class Config extends events {
      * @memberof Config#
      * @param {T=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
      * @return {Promise<this>}
-     *
-     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./path/to/config.json", {
@@ -281,6 +281,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @method setupAutoReload
      * @desc Setup configuration autoReload
@@ -290,8 +292,6 @@ class Config extends events {
      * @fires watcherInitialized
      * @fires reload
      * @fires error
-     *
-     * @version 0.1.0
      *
      * @throws {Error}
      */
@@ -327,6 +327,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @template H
      * @method get
@@ -337,8 +339,6 @@ class Config extends events {
      *
      * @throws {Error}
      * @throws {TypeError}
-     *
-     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./path/to/config.json", {
@@ -365,6 +365,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @template H
      * @method observableOf
@@ -373,8 +375,6 @@ class Config extends events {
      * @param {!Number} [depth=Infinity] Retrieved value depth!
      * @memberof Config#
      * @return {ZenObservable.ObservableLike<H>}
-     *
-     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./config.json", {
@@ -424,6 +424,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @template H
      * @method set
@@ -435,8 +437,6 @@ class Config extends events {
      *
      * @throws {Error}
      * @throws {TypeError}
-     *
-     * @version 0.1.0
      *
      * @example
      * const myConfig = new Config("./config.json", {
@@ -477,16 +477,16 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @method writeOnDisk
      * @desc Write the configuration on the Disk
      * @memberof Config#
      * @returns {Promise<void>}
      *
+     * @fires configWritten
      * @throws {Error}
-     * @fires configWrited
-     *
-     * @version 0.1.0
      *
      * @example
      * // Config can be created with the option `writeOnSet` that enable cfg auto-writing on disk after every set!
@@ -510,15 +510,25 @@ class Config extends events {
     }
 
     /**
+     * @version 0.5.0
+     *
      * @public
      * @method lazyWriteOnDisk
      * @desc lazy Write Configuration (write the configuration at the next loop iteration)
      * @memberof Config#
      * @returns {void}
      *
+     * @fires error
      * @throws {Error}
      *
-     * @version 0.5.0
+     * @example
+     * const cfg = new Config("./path/to/config.json");
+     * await cfg.read();
+     * cfg.set("field.path", "value");
+     * cfg.on("configWritten", () => {
+     *     console.log("Configuration written on the local disk!");
+     * });
+     * cfg.lazyWriteOnDisk();
      */
     lazyWriteOnDisk() {
         if (!this.configHasBeenRead) {
@@ -536,6 +546,8 @@ class Config extends events {
     }
 
     /**
+     * @version 0.1.0
+     *
      * @public
      * @method close
      * @desc Close (and write on disk) the configuration (it will close the watcher and clean all active observers).
@@ -543,8 +555,6 @@ class Config extends events {
      * @returns {Promise<void>}
      *
      * @throws {Error}
-     *
-     * @version 0.1.0
      *
      * @example
      * const cfg = new Config("./path/to/config.json");
