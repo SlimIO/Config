@@ -530,7 +530,6 @@ class Config extends events {
                 await this.writeOnDisk();
             }
             catch (error) {
-                /* istanbul ignore next */
                 this.emit("error", error);
             }
         });
