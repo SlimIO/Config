@@ -266,10 +266,16 @@ class Config extends events {
         // Write the configuraton on the disk for the first time (if there is no one available!).
         if (writeOnDisk) {
             this.lazyWriteOnDisk();
-        }
+            const autoReload = () => this.setupAutoReload();
 
-        // If autoReload is request, then setup it now!
-        this.setupAutoReload();
+            this.once("error", () => {
+                this.removeListener("configWritten", autoReload);
+            });
+            this.once("configWritten", autoReload);
+        }
+        else {
+            this.setupAutoReload();
+        }
 
         return this;
     }
