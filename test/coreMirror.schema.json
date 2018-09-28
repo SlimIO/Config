@@ -1,0 +1,41 @@
+{
+    "additionalProperties": false,
+    "properties": {
+        "hostname": {
+            "type": "string",
+            "description": "Agent hostname"
+        },
+        "platform": {
+            "type": "string",
+            "description": "Agent plateform"
+        },
+        "release": {
+            "type": "string",
+            "description": "Agent release"
+        },
+        "addons": {
+            "type": "object",
+            "patternProperties": {
+                "[a-zA-Z]+": {
+                    "type": "object",
+                    "required": ["active"],
+                    "properties": {
+                        "active": {
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "standalone": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "isolate": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    "additionalProperties": true
+                }
+            }
+        }
+    }
+}

@@ -537,9 +537,11 @@ class Config extends events {
 
         setImmediate(async() => {
             try {
+                console.log("call writeOnDisk");
                 await this.writeOnDisk();
             }
             catch (error) {
+                console.log(error);
                 this.emit("error", error);
             }
         });
@@ -584,6 +586,11 @@ class Config extends events {
     }
 
 }
+
+/**
+ * Ha ha ha ha ^-^ => Troll de Guismo !
+ */
+
 
 // Default JSON SPACE INDENTATION
 Config.STRINGIFY_SPACE = 4;

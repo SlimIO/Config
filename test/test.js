@@ -4,6 +4,7 @@
 // Require Node.JS Dependencies
 const { writeFile, unlink, access } = require("fs").promises;
 const { join } = require("path");
+const os = require("os");
 
 // Require Third-Party Dependencies!
 const avaTest = require("ava");
@@ -562,4 +563,48 @@ avaTest("Config set invalid value", async(assert) => {
         config.set("foo", 10);
     }, Error);
     assert.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
+});
+
+avaTest("Test config as a SlimIO Core Mirror", async(assert) => {
+    assert.plan(2);
+    const cfgPath = join(__dirname, "coreMirror.json");
+    const configObj = {
+        addons: {
+            cpu: {
+                active: false,
+                standalone: false
+            }
+        }
+    };
+    await writeFile(cfgPath, JSON.stringify(configObj, null, 4));
+    CFG_TO_CLEAR.push(cfgPath);
+
+    const config = new Config(cfgPath, {
+        createOnNoEntry: true,
+        writeOnSet: true,
+        autoReload: true,
+        reloadDelay: 500
+    });
+
+    let state = false;
+    await config.read({
+        hostname: os.hostname(),
+        platform: os.platform(),
+        release: os.release(),
+        addons: {}
+    });
+    config.observableOf("addons.cpu").subscribe((curr) => {
+        console.log(curr);
+        assert.is(curr.active, state);
+        state = !state;
+    }, console.error);
+
+    config.set("addons.cpu.active", true);
+    await new Promise((resolve, reject) => {
+        setTimeout(reject, 1000);
+        config.once("error", reject);
+        config.once("configWritten", resolve);
+    });
+
+    await config.close();
 });
