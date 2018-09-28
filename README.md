@@ -44,6 +44,13 @@ cfg.read().then(() => {
 }).catch(console.error);
 ```
 
+## Events
+Configuration Class have many events to warn developer when things happen:
+
+- configWritten (The configuration has been written on the local disk).
+- watcherInitialized (The file watcher has been initialized).
+- reload (The configuration has been hot reloaded successfully!).
+
 ## API
 
 ### constructor<T>(configFilePath: string, options?: Config.ConstructorOptions)
@@ -64,7 +71,7 @@ interface ConstructorOptions {
 }
 ```
 
-### read(defaultPayload?: T): Promise<this>;
+### read(defaultPayload?: T): Promise< this >;
 Will trigger and read the local configuration (on disk).
 
 ```js
@@ -76,13 +83,17 @@ assert.equal(cfg.configHasBeenRead, true); // true
 
 Retriggering the method will made an hot-reload of all properties. For a cold reload you will have to close the configuration before.
 
+> **Warning** When the file doesn't exist, the configuration is written at the next loop iteration (with lazyWriteOnDisk).
+
+![Read WorkFlow](https://i.imgur.com/uMY4DZV.png)
+
 ### setupAutoReload(): void;
 Setup hot reload (with a file watcher). This method is automatically triggered if the Configuration has been created with the option `autoReload` set to true.
 
 ### get<H>(fieldPath: string): H
 Get a value from a key (field path).
 
-For example, image a json file with a `foo` field
+For example, image a json file with a `foo` field. Under the hood the method work with `lodash.get` function.
 ```js
 const cfg = new Config("./path/to/file.json");
 await cfg.read();
@@ -90,7 +101,7 @@ const fooValue = cfg.get("foo");
 ```
 
 ### set<H>(fieldPath: string, fieldValue: H): void;
-Set a given field in the configuration
+Set a given field in the configuration. Under the hood the method work with `lodash.set` function.
 
 ```js
 const cfg = new Config("./config.json", {
@@ -121,8 +132,22 @@ const newPayload = { foo: "world" };
 await writeFile("./config.json", JSON.stringify(newPayload, null, 4));
 ```
 
-### writeOnDisk(): Promise<void>
+### writeOnDisk(): Promise< void >
 Write the configuration on the disk
 
-### close(): Promise<void>
+### lazyWriteOnDisk(): void
+Write the configuration on the disk (only at the next event-loop iteration).
+
+```js
+const cfg = new Config("./config.json", {
+    createOnNoEntry: true
+});
+await cfg.read();
+cfg.once("configWritten", () => {
+    console.log("Configuration written!");
+});
+cfg.lazyWriteOnDisk();
+```
+
+### close(): Promise< void >
 Close (and write on disk) the configuration (it will close the watcher and clean all active observers).
