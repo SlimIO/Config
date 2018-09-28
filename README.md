@@ -38,18 +38,28 @@ Now create a new Configuration instance and read it
 ```js
 const Config = require("@slimio/config");
 
-const cfg = new Config("./path/to/config.json");
-cfg.read().then(() => {
+async function main() {
+    const cfg = new Config("./path/to/config.json");
+    await cfg.read();
     console.log(cfg.get("loglevel")); // stdout: 5
-}).catch(console.error);
+
+    // Observe (with an Observable Like) the update made to login property
+    cfg.observableOf("login").subscribe(console.log);
+    cfg.set("login", "admin");
+
+    await cfg.close();
+}
+main().catch(console.error);
 ```
 
 ## Events
 Configuration Class have many events to warn developer when things happen:
 
-- configWritten (The configuration has been written on the local disk).
-- watcherInitialized (The file watcher has been initialized).
-- reload (The configuration has been hot reloaded successfully!).
+| event name | description |
+| --- | --- |
+| configWritten | The configuration payload has been written on the local disk |
+| watcherInitialized | The file watcher has been initialized (it will hot reload the configuration on modification) |
+| reload | The configuration has been hot reloaded successfully |
 
 ## API
 
@@ -85,7 +95,9 @@ Retriggering the method will made an hot-reload of all properties. For a cold re
 
 > **Warning** When the file doesn't exist, the configuration is written at the next loop iteration (with lazyWriteOnDisk).
 
-![Read WorkFlow](https://i.imgur.com/uMY4DZV.png)
+<p align="center">
+    <img src="https://i.imgur.com/uMY4DZV.png" height="500">
+</p>
 
 ### setupAutoReload(): void;
 Setup hot reload (with a file watcher). This method is automatically triggered if the Configuration has been created with the option `autoReload` set to true.
@@ -93,15 +105,17 @@ Setup hot reload (with a file watcher). This method is automatically triggered i
 ### get<H>(fieldPath: string): H
 Get a value from a key (field path).
 
-For example, image a json file with a `foo` field. Under the hood the method work with `lodash.get` function.
+For example, image a json file with a `foo` field.
 ```js
 const cfg = new Config("./path/to/file.json");
 await cfg.read();
 const fooValue = cfg.get("foo");
 ```
 
+> Under the hood the method work with `lodash.get` function.
+
 ### set<H>(fieldPath: string, fieldValue: H): void;
-Set a given field in the configuration. Under the hood the method work with `lodash.set` function.
+Set a given field in the configuration.
 
 ```js
 const cfg = new Config("./config.json", {
@@ -113,8 +127,10 @@ cfg.set("foo", "hello world!");
 await cfg.writeOnDisk();
 ```
 
+> Under the hood the method work with `lodash.set` function.
+
 ### observableOf(fieldPath: string): ObservableLike;
-Observe a given configuration key with an Observable object!
+Observe a given configuration key with an Observable Like object!
 
 ```js
 const { writeFile } = require("fs").promises;
@@ -133,10 +149,10 @@ await writeFile("./config.json", JSON.stringify(newPayload, null, 4));
 ```
 
 ### writeOnDisk(): Promise< void >
-Write the configuration on the disk
+Write the configuration on the disk.
 
 ### lazyWriteOnDisk(): void
-Write the configuration on the disk (only at the next event-loop iteration).
+Write the configuration on the disk (only at the next event-loop iteration). Use the event `configWritten` to known when the configuration will be written.
 
 ```js
 const cfg = new Config("./config.json", {
@@ -150,4 +166,4 @@ cfg.lazyWriteOnDisk();
 ```
 
 ### close(): Promise< void >
-Close (and write on disk) the configuration (it will close the watcher and clean all active observers).
+Close (and write on disk) the configuration (it will close the watcher and complete/clean all active observers subscribers).
