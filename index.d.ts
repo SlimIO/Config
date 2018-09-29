@@ -29,7 +29,7 @@ declare class Config<T> extends events.EventEmitter {
     // Methods
     public read(defaultPayload?: T): Promise<this>;
     public setupAutoReload(): boolean;
-    public get<H>(fieldPath: string): H;
+    public get<H>(fieldPath: string, depth?: number): H;
     public set<H>(fieldPath: string, fieldValue: H): void;
     public observableOf<H>(fieldPath: string, depth?: number): ZenObservable.ObservableLike<H>;
     public writeOnDisk(): Promise<void>;

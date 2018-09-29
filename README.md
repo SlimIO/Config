@@ -107,7 +107,7 @@ Setup hot reload (with a file watcher). This method is automatically triggered i
 
 We use the package [node-watch](https://www.npmjs.com/package/node-watch) to achieve the hot reload.
 
-### get<H>(fieldPath: string): H
+### get<H>(fieldPath: string, depth?: number): H
 Get a value from a key (field path).
 
 For example, image a json file with a `foo` field.
@@ -134,7 +134,7 @@ await cfg.writeOnDisk();
 
 > Under the hood the method work with `lodash.set` function.
 
-### observableOf(fieldPath: string): ObservableLike;
+### observableOf(fieldPath: string, depth?: number): ObservableLike;
 Observe a given configuration key with an Observable Like object!
 
 ```js
