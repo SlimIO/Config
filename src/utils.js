@@ -26,6 +26,34 @@ function formatAjvErrors(ajvErrors) {
     return stdout.join("");
 }
 
+/**
+ * @exports utils/limitObjectDepth
+ * @function limitObjectDepth
+ * @memberof utils#
+ * @desc Limit an given object depth!
+ * @param {!Object} obj obj
+ * @param {Number=} [depth=0] depth
+ * @returns {Object | Array}
+ */
+function limitObjectDepth(obj, depth = 0) {
+    if (!is.plainObject(obj)) {
+        return obj;
+    }
+
+    if (depth === 0) {
+        return Object.keys(obj);
+    }
+
+    // eslint-disable-next-line
+    const subDepth = depth--;
+    for (const [key, value] of Object.entries(obj)) {
+        obj[key] = limitObjectDepth(value, subDepth);
+    }
+
+    return obj;
+}
+
 module.exports = {
-    formatAjvErrors
+    formatAjvErrors,
+    limitObjectDepth
 };
