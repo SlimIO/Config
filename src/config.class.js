@@ -552,7 +552,6 @@ class Config extends events {
                 await this.writeOnDisk();
             }
             catch (error) {
-                console.log(error);
                 this.emit("error", error);
             }
         });
