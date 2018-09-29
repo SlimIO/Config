@@ -13,7 +13,7 @@ const set = require("lodash.set");
 const Observable = require("zen-observable");
 
 // Require Internal dependencie(s)
-const { formatAjvErrors } = require("./utils");
+const { formatAjvErrors, limitObjectDepth } = require("./utils");
 
 // Private Config Accessors
 const payload = Symbol("payload");
@@ -95,8 +95,17 @@ class Config extends events {
         this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
         this.configHasBeenRead = false;
 
-        /** @type {Array<Array.<string, ZenObservable.SubscriptionObserver<any>>>} */
-        this.subscriptionObservers = [];
+        /** @type {Map<string, ZenObservable.SubscriptionObserver<any>>} */
+        this.subscriptionObservers = new Map();
+
+        // Cleanup closed subscription every second
+        setInterval(() => {
+            for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers.entries()) {
+                if (subscriptionObservers.closed) {
+                    this.subscriptionObservers.delete(fieldPath);
+                }
+            }
+        }, 1000);
 
         // Assign defaultSchema is exist!
         if (Reflect.has(options, "defaultSchema")) {
@@ -168,7 +177,7 @@ class Config extends events {
         }
 
         this[payload] = tempPayload;
-        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
+        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers.entries()) {
             subscriptionObservers.next(this.get(fieldPath));
         }
     }
@@ -334,6 +343,7 @@ class Config extends events {
      * @method get
      * @desc Get a given field of the configuration
      * @param {!String} fieldPath Path to the field (separated with dot)
+     * @param {Number=} [depth=Infinity] Payload depth!
      * @memberof Config#
      * @return {H}
      *
@@ -353,7 +363,7 @@ class Config extends events {
      * }
      * main().catch(console.error);
      */
-    get(fieldPath) {
+    get(fieldPath, depth = Infinity) {
         if (!this.configHasBeenRead) {
             throw new Error("Config.get - Unable to get a key, the configuration has not been initialized yet!");
         }
@@ -361,7 +371,12 @@ class Config extends events {
             throw new TypeError("Config.get->fieldPath should be typeof <string>");
         }
 
-        return get(this.payload, fieldPath);
+        let ret = get(this.payload, fieldPath);
+        if (Number.isFinite(ret)) {
+            ret = limitObjectDepth(ret, depth);
+        }
+
+        return ret;
     }
 
     /**
@@ -411,15 +426,12 @@ class Config extends events {
          * Retrieve the field value first
          * @type {H}
          */
-        const fieldValue = this.get(fieldPath);
-        if (Number.isFinite(depth)) {
-            throw new Error("ObservableOf depth is not implemented yet!");
-        }
+        const fieldValue = this.get(fieldPath, depth);
 
         return new Observable((observer) => {
             // Send it as first Observed value!
             observer.next(fieldValue);
-            this.subscriptionObservers.push([fieldPath, observer]);
+            this.subscriptionObservers.set(fieldPath, observer);
         });
     }
 
@@ -537,11 +549,9 @@ class Config extends events {
 
         setImmediate(async() => {
             try {
-                console.log("call writeOnDisk");
                 await this.writeOnDisk();
             }
             catch (error) {
-                console.log(error);
                 this.emit("error", error);
             }
         });
@@ -578,19 +588,14 @@ class Config extends events {
         }
 
         // Complete all observers
-        for (const [index, subscriptionObservers] of this.subscriptionObservers) {
+        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers.entries()) {
             subscriptionObservers.complete();
-            this.subscriptionObservers.splice(index, 1);
+            this.subscriptionObservers.delete(fieldPath);
         }
         this.configHasBeenRead = false;
     }
 
 }
-
-/**
- * Ha ha ha ha ^-^ => Troll de Guismo !
- */
-
 
 // Default JSON SPACE INDENTATION
 Config.STRINGIFY_SPACE = 4;

@@ -19,7 +19,7 @@ declare class Config<T> extends events.EventEmitter {
     public autoReloadActivated: boolean;
     public reloadDelay: number;
     public configHasBeenRead: boolean;
-    public subscriptionObservers: Array<[string, ZenObservable.SubscriptionObserver<any>]>;
+    public subscriptionObservers: Map<string, ZenObservable.SubscriptionObserver<any>>;
     public payload: T;
     public defaultSchema: object;
 
