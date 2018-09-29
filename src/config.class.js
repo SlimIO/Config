@@ -101,10 +101,9 @@ class Config extends events {
         // Cleanup closed subscription every second
         setInterval(() => {
             for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
-                if (!subscriptionObservers.closed) {
-                    continue;
+                if (subscriptionObservers.closed) {
+                    this.subscriptionObservers.splice(fieldPath, 1);
                 }
-                this.subscriptionObservers.splice(fieldPath, 1);
             }
         }, 1000);
 
@@ -550,7 +549,6 @@ class Config extends events {
 
         setImmediate(async() => {
             try {
-                console.log("call writeOnDisk");
                 await this.writeOnDisk();
             }
             catch (error) {

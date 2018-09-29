@@ -45,9 +45,9 @@ function limitObjectDepth(obj, depth = 0) {
     }
 
     // eslint-disable-next-line
-    const subDepth = depth--;
+    const subDepth = --depth;
     for (const [key, value] of Object.entries(obj)) {
-        obj[key] = limitObjectDepth(value, subDepth);
+        Reflect.set(obj, key, limitObjectDepth(value, subDepth));
     }
 
     return obj;

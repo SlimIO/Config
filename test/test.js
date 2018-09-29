@@ -12,7 +12,7 @@ const is = require("@slimio/is");
 
 // Require Internal Dependencies
 const Config = require("../src/config.class");
-const { formatAjvErrors } = require("../src/utils.js");
+const { formatAjvErrors, limitObjectDepth } = require("../src/utils.js");
 
 // LOAD SCHEMA & DEFAULT CONFIG PAYLOAD
 const configSchemaJSON = require("./config.schema.json");
@@ -146,6 +146,40 @@ avaTest("Set payload value by rewriting config on the disk", async(assert) => {
     // Verify if foo is equal to the new payload value
     assert.is(config.payload.foo, "Hello");
 
+    await config.close();
+});
+
+avaTest("Observe the same fieldPath multiple time", async(assert) => {
+    assert.plan(6);
+    const { config } = await createNewConfiguration({
+        autoReload: true,
+        reloadDelay: 100
+    });
+
+    await config.read();
+    const obs = config.observableOf("foo");
+
+    await new Promise((resolve) => {
+        obs.subscribe((curr) => {
+            if (curr === "world!" || curr === "Wahou!") {
+                assert.pass();
+            }
+        });
+        obs.subscribe((curr) => {
+            if (curr === "world!" || curr === "Wahou!") {
+                assert.pass();
+            }
+        });
+        config.set("foo", "Wahou!");
+        setTimeout(resolve, 200);
+    });
+
+    assert.is(config.subscriptionObservers.length, 2);
+    for (const [, obs] of config.subscriptionObservers) {
+        obs.complete();
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    assert.is(config.subscriptionObservers.length, 0);
     await config.close();
 });
 
@@ -565,6 +599,33 @@ avaTest("Config set invalid value", async(assert) => {
     assert.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
 });
 
+avaTest("limitObjectDepth", (assert) => {
+    // Return value if not plainObject
+    const num = limitObjectDepth(5);
+    assert.is(num, 5);
+
+    // Return array of keys if depth is equal to 0
+    const objKeys = limitObjectDepth({ keya: 0, keyb: 0 }, 0);
+    assert.deepEqual(objKeys, ["keya", "keyb"]);
+
+    const completeObj = {
+        hey: "oh",
+        depth: {
+            keya: 0,
+            keyb: {
+                foo: "bar"
+            }
+        },
+        arrV: [1, 2]
+    };
+    const limitedObj = limitObjectDepth(completeObj, 1);
+    assert.deepEqual(limitedObj, {
+        hey: "oh",
+        depth: ["keya", "keyb"],
+        arrV: [1, 2]
+    });
+});
+
 avaTest("Test config as a SlimIO Core Mirror", async(assert) => {
     assert.plan(2);
     const cfgPath = join(__dirname, "coreMirror.json");
@@ -594,7 +655,6 @@ avaTest("Test config as a SlimIO Core Mirror", async(assert) => {
         addons: {}
     });
     config.observableOf("addons.cpu").subscribe((curr) => {
-        console.log(curr);
         assert.is(curr.active, state);
         state = !state;
     }, console.error);
