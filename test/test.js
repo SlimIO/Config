@@ -53,7 +53,7 @@ function assertConfigTypesAndValues(assert, config, checkDefaultValues = false) 
     assert.true(is.number(config.reloadDelay));
     assert.true(is.bool(config.writeOnSet));
     assert.true(is.bool(config.configHasBeenRead));
-    assert.true(is.map(config.subscriptionObservers));
+    assert.true(is.array(config.subscriptionObservers));
 
     // Check default class properties values
     if (checkDefaultValues) {
@@ -63,7 +63,7 @@ function assertConfigTypesAndValues(assert, config, checkDefaultValues = false) 
         assert.is(config.reloadDelay, 500);
         assert.false(config.writeOnSet);
         assert.false(config.configHasBeenRead);
-        assert.true(config.subscriptionObservers.size === 0);
+        assert.deepEqual(config.subscriptionObservers, []);
     }
 }
 
@@ -171,10 +171,10 @@ avaTest("Observe a value and stream/wait update", async(assert) => {
         setTimeout(reject, 1000);
     });
 
-    assert.is(config.subscriptionObservers.size, 1);
+    assert.is(config.subscriptionObservers.length, 1);
     assert.is(config.payload.foo, "Wahou!");
     await config.close();
-    assert.is(config.subscriptionObservers.size, 0);
+    assert.is(config.subscriptionObservers.length, 0);
 });
 
 avaTest("Get payload without triggering read()", async(assert) => {

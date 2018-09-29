@@ -95,15 +95,16 @@ class Config extends events {
         this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
         this.configHasBeenRead = false;
 
-        /** @type {Map<string, ZenObservable.SubscriptionObserver<any>>} */
-        this.subscriptionObservers = new Map();
+        /** @type {Array<Array<string, ZenObservable.SubscriptionObserver<any>>>} */
+        this.subscriptionObservers = [];
 
         // Cleanup closed subscription every second
         setInterval(() => {
-            for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers.entries()) {
-                if (subscriptionObservers.closed) {
-                    this.subscriptionObservers.delete(fieldPath);
+            for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
+                if (!subscriptionObservers.closed) {
+                    continue;
                 }
+                this.subscriptionObservers.splice(fieldPath, 1);
             }
         }, 1000);
 
@@ -177,7 +178,7 @@ class Config extends events {
         }
 
         this[payload] = tempPayload;
-        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers.entries()) {
+        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.next(this.get(fieldPath));
         }
     }
@@ -431,7 +432,7 @@ class Config extends events {
         return new Observable((observer) => {
             // Send it as first Observed value!
             observer.next(fieldValue);
-            this.subscriptionObservers.set(fieldPath, observer);
+            this.subscriptionObservers.push([fieldPath, observer]);
         });
     }
 
@@ -549,9 +550,11 @@ class Config extends events {
 
         setImmediate(async() => {
             try {
+                console.log("call writeOnDisk");
                 await this.writeOnDisk();
             }
             catch (error) {
+                console.log(error);
                 this.emit("error", error);
             }
         });
@@ -588,9 +591,9 @@ class Config extends events {
         }
 
         // Complete all observers
-        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers.entries()) {
+        for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
             subscriptionObservers.complete();
-            this.subscriptionObservers.delete(fieldPath);
+            this.subscriptionObservers.splice(fieldPath, 1);
         }
         this.configHasBeenRead = false;
     }
