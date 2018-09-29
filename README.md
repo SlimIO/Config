@@ -33,7 +33,7 @@ Create a simple json file for your project (As below)
 }
 ```
 
-Now create a new Configuration instance and read it
+Now, create a new Configuration instance and read it
 
 ```js
 const Config = require("@slimio/config");
@@ -66,23 +66,26 @@ Configuration Class have many events to warn developer when things happen:
 ### constructor<T>(configFilePath: string, options?: Config.ConstructorOptions)
 Create a new Configuration instance
 ```js
-const options = { autoReload: true };
-const cfg = new Config("./path/to/file.json", options);
+const cfg = new Config("./path/to/file.json", {
+    createOnNoEntry: true,
+    autoReload: true
+});
 ```
 
-Available options are
-```ts
-interface ConstructorOptions {
-    createOnNoEntry?: boolean;
-    writeOnSet?: boolean;
-    autoReload?: boolean;
-    reloadDelay?: number;
-    defaultSchema?: object;
-}
-```
+Available options are:
+
+| name | type | default value | description |
+| --- | --- | --- | --- |
+| createOnNoEntry | boolean | false | Create the file with default payload value if he doesn't exist on the local disk |
+| writeOnSet | boolean | false | Write the file on the disk after each time .set() is called |
+| autoReload | boolean | false | Setup hot reload of the configuration file |
+| reloadDelay | number | 500ms | The delay to wait before hot reloading the configuration, it's a security to avoid event spamming |
+| defaultSchema | plainObject | null | The default JSON Schema for the configuration |
+
+> **Note**: When no schema is provided, it will search for a file prefixed by `.schema` with the config name.
 
 ### read(defaultPayload?: T): Promise< this >;
-Will trigger and read the local configuration (on disk).
+Will trigger and read the local configuration (on disk). A default `payload` value can be provided in case the file doesn't exist !
 
 ```js
 const cfg = new Config("./path/to/file.json");
@@ -101,6 +104,8 @@ Retriggering the method will made an hot-reload of all properties. For a cold re
 
 ### setupAutoReload(): void;
 Setup hot reload (with a file watcher). This method is automatically triggered if the Configuration has been created with the option `autoReload` set to true.
+
+We use the package [node-watch](https://www.npmjs.com/package/node-watch) to achieve the hot reload.
 
 ### get<H>(fieldPath: string): H
 Get a value from a key (field path).
