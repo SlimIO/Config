@@ -1,8 +1,11 @@
+test/
+tests/
+coverage/
+.nyc_output/
+jsdoc/
+jsdoc.json
+CONTRIBUTING.md
 .editorconfig
 .eslintrc
 .gitignore
-test
-tests
-jsdoc
-spec
-CONTRIBUTING.md
+tsconfig.json
