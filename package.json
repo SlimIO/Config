@@ -31,18 +31,18 @@
   "homepage": "https://github.com/SlimIO/Config#readme",
   "devDependencies": {
     "@escommunity/minami": "^1.0.0",
-    "@slimio/eslint-config": "^1.1.7",
+    "@slimio/eslint-config": "^1.1.8",
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/lodash.get": "^4.4.4",
     "@types/lodash.set": "^4.3.4",
-    "@types/node": "^10.10.1",
+    "@types/node": "^10.11.3",
     "@types/zen-observable": "^0.8.0",
     "ava": "^0.25.0",
-    "eslint": "^5.6.0",
+    "eslint": "^5.6.1",
     "nyc": "^13.0.1"
   },
   "dependencies": {
-    "@slimio/is": "^1.0.0",
+    "@slimio/is": "^1.1.0",
     "ajv": "^6.5.3",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
