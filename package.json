@@ -4,10 +4,10 @@
   "description": "SlimIO Reactive JSON Config loaded",
   "main": "index.js",
   "scripts": {
-    "test": "npx ava --verbose",
-    "doc": "npx jsdoc -c ./jsdoc.json -r",
-    "coverage": "npx nyc ava",
-    "report": "npx nyc report --reporter=html"
+    "test": "ava --verbose",
+    "doc": "jsdoc -c ./jsdoc.json -r",
+    "coverage": "nyc ava",
+    "report": "nyc report --reporter=html"
   },
   "repository": {
     "type": "git",
