@@ -9,3 +9,4 @@ CONTRIBUTING.md
 .eslintrc
 .gitignore
 tsconfig.json
+commitlint.config.js
