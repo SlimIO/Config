@@ -10,7 +10,7 @@ SlimIO - Reactive JSON Config loader
 
 - Hot-reloading of configuration
 - Reactive with observable key(s)
-- Safe with JSON Schema validation
+- Safe with [JSON Schema](https://json-schema.org/) validation
 
 ## Getting Started
 
@@ -54,7 +54,7 @@ main().catch(console.error);
 ```
 
 ## Events
-Configuration Class have many events to warn developer when things happen:
+Configuration class is extended by a Node.js EventEmitter. The class can trigger several events:
 
 | event name | description |
 | --- | --- |
@@ -83,7 +83,7 @@ Available options are:
 | reloadDelay | number | 500ms | The delay to wait before hot reloading the configuration, it's a security to avoid event spamming |
 | defaultSchema | plainObject | null | The default JSON Schema for the configuration |
 
-> **Note**: When no schema is provided, it will search for a file prefixed by `.schema` with the config name.
+> **Note**: When no schema is provided, it will search for a file prefixed by `.schema` with the same config name.
 
 ### read(defaultPayload?: T): Promise< this >;
 Will trigger and read the local configuration (on disk). A default `payload` value can be provided in case the file doesn't exist !
