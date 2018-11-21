@@ -566,6 +566,7 @@ class Config extends events {
      * @memberof Config#
      * @returns {Promise<void>}
      *
+     * @fires close
      * @throws {Error}
      *
      * @example
@@ -592,6 +593,8 @@ class Config extends events {
             subscriptionObservers.complete();
             this.subscriptionObservers.splice(fieldPath, 1);
         }
+
+        this.emit("close");
         this.configHasBeenRead = false;
     }
 
