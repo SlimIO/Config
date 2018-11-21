@@ -61,6 +61,7 @@ Configuration class is extended by a Node.js EventEmitter. The class can trigger
 | configWritten | The configuration payload has been written on the local disk |
 | watcherInitialized | The file watcher has been initialized (it will hot reload the configuration on modification) |
 | reload | The configuration has been hot reloaded successfully |
+| close | Event triggered when the configuration is asked to be closed |
 
 ## API
 
