@@ -251,6 +251,17 @@ class Config extends events {
         // Setup Schema
         this[schema] = ajv.compile(JSONSchema);
 
+        if (!this.configHasBeenRead) {
+            // Cleanup closed subscription every second
+            this.cleanupTimeout = setInterval(() => {
+                for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
+                    if (subscriptionObservers.closed) {
+                        this.subscriptionObservers.splice(fieldPath, 1);
+                    }
+                }
+            }, 1000);
+        }
+
         // Setup config state has "read" true
         this.configHasBeenRead = true;
 
@@ -262,15 +273,6 @@ class Config extends events {
             this.configHasBeenRead = false;
             throw error;
         }
-
-        // Cleanup closed subscription every second
-        this.cleanupTimeout = setInterval(() => {
-            for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
-                if (subscriptionObservers.closed) {
-                    this.subscriptionObservers.splice(fieldPath, 1);
-                }
-            }
-        }, 1000);
 
         // Write the configuraton on the disk for the first time (if there is no one available!).
         if (writeOnDisk) {
