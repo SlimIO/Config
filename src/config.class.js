@@ -98,15 +98,6 @@ class Config extends events {
         /** @type {Array<Array<string, ZenObservable.SubscriptionObserver<any>>>} */
         this.subscriptionObservers = [];
 
-        // Cleanup closed subscription every second
-        this.cleanupTimeout = setInterval(() => {
-            for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
-                if (subscriptionObservers.closed) {
-                    this.subscriptionObservers.splice(fieldPath, 1);
-                }
-            }
-        }, 1000);
-
         // Assign defaultSchema is exist!
         if (Reflect.has(options, "defaultSchema")) {
             if (!is.plainObject(options.defaultSchema)) {
@@ -271,6 +262,15 @@ class Config extends events {
             this.configHasBeenRead = false;
             throw error;
         }
+
+        // Cleanup closed subscription every second
+        this.cleanupTimeout = setInterval(() => {
+            for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
+                if (subscriptionObservers.closed) {
+                    this.subscriptionObservers.splice(fieldPath, 1);
+                }
+            }
+        }, 1000);
 
         // Write the configuraton on the disk for the first time (if there is no one available!).
         if (writeOnDisk) {
