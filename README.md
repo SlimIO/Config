@@ -174,3 +174,20 @@ cfg.lazyWriteOnDisk();
 
 ### close(): Promise< void >
 Close (and write on disk) the configuration (it will close the watcher and complete/clean all active observers subscribers).
+
+## Properties
+
+### STRINGIFY_SPACE
+The `STRINGIFY_SPACE` property allow you to redine the espace used internaly for `JSON.stringify` method. The default value is **4**.
+
+### DEFAULT_SCHEMA
+
+The `DEFAULT_SCHEMA` property allow you to redefine the default schema that should be applied if no schema is provided when constructor is triggered!
+
+The default value is the following Object:
+```js
+{
+    title: "CONFIG",
+    additionalProperties: true
+}
+```
