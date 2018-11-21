@@ -99,7 +99,7 @@ class Config extends events {
         this.subscriptionObservers = [];
 
         // Cleanup closed subscription every second
-        setInterval(() => {
+        this.cleanupTimeout = setInterval(() => {
             for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
                 if (subscriptionObservers.closed) {
                     this.subscriptionObservers.splice(fieldPath, 1);
@@ -593,6 +593,9 @@ class Config extends events {
             subscriptionObservers.complete();
             this.subscriptionObservers.splice(fieldPath, 1);
         }
+
+        // Close cleanup interval
+        clearInterval(this.cleanupTimeout);
 
         this.emit("close");
         this.configHasBeenRead = false;
