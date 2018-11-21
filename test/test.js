@@ -2,7 +2,7 @@
 /* eslint max-len: off */
 
 // Require Node.JS Dependencies
-const { writeFile, unlink, access } = require("fs").promises;
+const { writeFile, readFile, unlink, access } = require("fs").promises;
 const { join } = require("path");
 const os = require("os");
 
@@ -181,6 +181,26 @@ avaTest("Observe the same fieldPath multiple time", async(assert) => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     assert.is(config.subscriptionObservers.length, 0);
     await config.close();
+});
+
+avaTest("Verify STRINGIFY_SPACE", async(assert) => {
+    assert.is(Config.STRINGIFY_SPACE, 4);
+
+    const { num, config } = await createNewConfiguration();
+    await config.read();
+
+    Config.STRINGIFY_SPACE = 2;
+    await config.writeOnDisk();
+
+    const dPayload = {
+        foo: "world!",
+        test: "hello world!"
+    };
+    const buf = await readFile(join(__dirname, `config${num}.json`));
+    assert.is(JSON.stringify(dPayload, null, 2), buf.toString());
+
+    await config.close();
+    Config.STRINGIFY_SPACE = 4;
 });
 
 avaTest("Observe a value and stream/wait update", async(assert) => {
