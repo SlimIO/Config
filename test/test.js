@@ -606,6 +606,25 @@ avaTest("Can't lazyWriteDisk if config has not been read", async(assert) => {
     assert.is(error.message, "Config.lazyWriteOnDisk - Cannot lazy write unreaded configuration on the disk");
 });
 
+avaTest("Closed configuration should not be hot reloaded!", async(assert) => {
+    const { config } = await createNewConfiguration({
+        autoReload: true,
+        reloadDelay: 50
+    });
+    config.on("reload", () => {
+        assert.fail();
+    });
+
+    await config.read();
+    config.set("foo", "world!");
+    await config.writeOnDisk();
+
+    await config.close();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    assert.pass();
+});
+
 avaTest("Config set invalid value", async(assert) => {
     const { config } = await createNewConfiguration({
         writeOnSet: true

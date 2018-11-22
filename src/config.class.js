@@ -276,13 +276,13 @@ class Config extends events {
 
         // Write the configuraton on the disk for the first time (if there is no one available!).
         if (writeOnDisk) {
-            this.lazyWriteOnDisk();
             const autoReload = () => this.setupAutoReload();
 
             this.once("error", () => {
                 this.removeListener("configWritten", autoReload);
             });
             this.once("configWritten", autoReload);
+            this.lazyWriteOnDisk();
         }
         else {
             this.setupAutoReload();
@@ -319,6 +319,9 @@ class Config extends events {
         const watcherOptions = { delay: this.reloadDelay };
         this.watcher = watcher(this.configFile, watcherOptions, async() => {
             try {
+                if (!this.configHasBeenRead) {
+                    return;
+                }
                 await this.read();
                 this.emit("reload");
             }
