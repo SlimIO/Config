@@ -36,3 +36,6 @@ jobs:
       # run tests!
       - run: npm test
 
+notify:
+  webhooks:
+    - url: https://discordapp.com/api/webhooks/515579726341865494/aSQbbZppzkg0IPg7pT4FNFXsmtCyVZLkTyqN3fo5Gc1eq-qEddBomW3ZIovrUlcWs46E
