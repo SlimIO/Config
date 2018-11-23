@@ -3,7 +3,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SlimIO/Config/commit-activity)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Config/blob/master/LICENSE)
 [![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Config/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Config?targetFile=package.json)
-[![CircleCI](https://circleci.com/gh/SlimIO/Config/tree/master.svg?style=svg)](https://circleci.com/gh/SlimIO/Config/tree/master)
+[![CircleCI](https://circleci.com/gh/SlimIO/Config/tree/master.svg?style=svg)](https://circleci.com/gh/SlimIO/Config/tree/master) [![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Config.svg)](https://greenkeeper.io/)
 
 SlimIO - Reactive JSON Config loader
 
