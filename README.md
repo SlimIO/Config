@@ -54,6 +54,8 @@ async function main() {
 main().catch(console.error);
 ```
 
+> **Note:** config.json should exist (if not, it will throw an Error). Look at `createOnNoEntry` option for more information !
+
 ## Events
 Configuration class is extended by a Node.js EventEmitter. The class can trigger several events:
 
@@ -66,7 +68,7 @@ Configuration class is extended by a Node.js EventEmitter. The class can trigger
 
 ## API
 
-### constructor<T>(configFilePath: string, options?: Config.ConstructorOptions)
+### constructor< T >(configFilePath: string, options?: Config.ConstructorOptions)
 Create a new Configuration instance
 ```js
 const cfg = new Config("./path/to/file.json", {
@@ -91,10 +93,12 @@ Available options are:
 Will trigger and read the local configuration (on disk). A default `payload` value can be provided in case the file doesn't exist !
 
 ```js
+const { strictEqual } = require("assert");
+
 const cfg = new Config("./path/to/file.json");
-assert.equal(cfg.configHasBeenRead, false); // true
+strictEqual(cfg.configHasBeenRead, false); // true
 await cfg.read();
-assert.equal(cfg.configHasBeenRead, true); // true
+strictEqual(cfg.configHasBeenRead, true); // true
 ```
 
 Retriggering the method will made an hot-reload of all properties. For a cold reload you will have to close the configuration before.
