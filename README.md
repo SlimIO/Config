@@ -49,6 +49,9 @@ async function main() {
     cfg.observableOf("login").subscribe(console.log);
     cfg.set("login", "admin");
 
+    // Payload getter will return a deepClone with all configuration properties
+    console.log(cfg.payload);
+
     await cfg.close();
 }
 main().catch(console.error);
@@ -114,7 +117,7 @@ Setup hot reload (with a file watcher). This method is automatically triggered i
 
 We use the package [node-watch](https://www.npmjs.com/package/node-watch) to achieve the hot reload.
 
-### get<H>(fieldPath: string, depth?: number): H
+### get< H >(fieldPath: string, depth?: number): H
 Get a value from a key (field path).
 
 For example, image a json file with a `foo` field.
@@ -126,7 +129,9 @@ const fooValue = cfg.get("foo");
 
 > Under the hood the method work with `lodash.get` function.
 
-### set<H>(fieldPath: string, fieldValue: H): void;
+If the retrieved value is a JavaScript object, you can limit the depth by setting `depth` option.
+
+### set< H >(fieldPath: string, fieldValue: H): void;
 Set a given field in the configuration.
 
 ```js
