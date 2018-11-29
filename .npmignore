@@ -6,6 +6,7 @@ jsdoc/
 jsdoc.json
 docs/
 CONTRIBUTING.md
+CHANGELOG.md
 .editorconfig
 .eslintrc
 .gitignore
