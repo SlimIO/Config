@@ -8,7 +8,7 @@
     "test": "ava --verbose",
     "doc": "jsdoc -c ./jsdoc.json -r",
     "coverage": "nyc ava",
-    "changelog": "conventional-changelog -i CHANGELOG.md -s",
+    "version": "conventional-changelog -i CHANGELOG.md -s",
     "report": "nyc report --reporter=html"
   },
   "repository": {
