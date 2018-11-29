@@ -2,6 +2,7 @@ test/
 tests/
 coverage/
 .nyc_output/
+.circleci/
 jsdoc/
 jsdoc.json
 docs/
