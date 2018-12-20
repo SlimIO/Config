@@ -241,41 +241,36 @@ avaTest("Get payload without triggering read()", async(assert) => {
 });
 
 avaTest("Constructor throw error 'configFilePath should be typeof <string>'", (assert) => {
-    const error = assert.throws(() => {
+    assert.throws(() => {
         new Config(10);
-    }, TypeError);
-    assert.is(error.message, "Config.constructor->configFilePath should be typeof <string>");
+    }, { instanceOf: TypeError, message: "Config.constructor->configFilePath should be typeof <string>" });
 });
 
 avaTest("Constructor throw error 'configFilePath - file extension should be .json'", (assert) => {
-    const error = assert.throws(() => {
+    assert.throws(() => {
         new Config("test.txt");
-    }, Error);
-    assert.is(error.message, "Config.constructor->configFilePath - file extension should be .json");
+    }, { instanceOf: Error, message: "Config.constructor->configFilePath - file extension should be .json" });
 });
 
 avaTest("Constructor throw error 'options should be instanceof Object prototype'", (assert) => {
-    const error = assert.throws(() => {
+    assert.throws(() => {
         new Config("./test.json", 150);
-    }, Error);
-    assert.is(error.message, "Config.constructor->options should be instanceof Object prototype");
+    }, { instanceOf: Error, message: "Config.constructor->options should be instanceof Object prototype" });
 });
 
 avaTest("Constructor throw error 'defaultSchema should be instanceof Object prototype'", (assert) => {
     const error = assert.throws(() => {
         new Config("./test.json", { defaultSchema: 150 });
-    }, Error);
-    assert.is(error.message, "Config.constructor->options defaultSchema should be instanceof Object prototype");
+    }, { instanceOf: Error, message: "Config.constructor->options defaultSchema should be instanceof Object prototype" });
 });
 
 avaTest("Can't set a new payload when config has not been read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.payload = {};
-    }, Error);
-    assert.is(error.message, "Config.payload - cannot set a new payload when the config has not been read yet!");
+    }, { instanceOf: Error, message: "Config.payload - cannot set a new payload when the config has not been read yet!" });
 });
 
 avaTest("New (set) payload should be typeof <Object>", async(assert) => {
@@ -283,10 +278,9 @@ avaTest("New (set) payload should be typeof <Object>", async(assert) => {
     assertConfigTypesAndValues(assert, config);
     await config.read();
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.payload = 10;
-    }, TypeError);
-    assert.is(error.message, "Config.payload->newPayload should be typeof <Object>");
+    }, { instanceOf: TypeError, message: "Config.payload->newPayload should be typeof <Object>" });
 
     await config.close();
 });
@@ -296,10 +290,12 @@ avaTest("Set a new payload that doesn't match the current Schema", async(test) =
     assertConfigTypesAndValues(test, config);
     await config.read();
 
-    const error = test.throws(() => {
+    test.throws(() => {
         config.payload = { foo: 10 };
-    }, Error);
-    test.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
+    }, {
+        instanceOf: Error,
+        message: "Config.payload - Failed to validate new configuration, err => property .foo should be string\n"
+    });
 
     await config.close();
 });
@@ -335,8 +331,7 @@ avaTest("Zero configuration (with createOnNoEntry equal true)", async(assert) =>
 avaTest("Create a configuration with noEntry (Should throw)", async(assert) => {
     const config = new Config(join(__dirname, "zeroConfig2.json"));
 
-    const error = await assert.throws(config.read());
-    assert.is(error.code, "ENOENT");
+    await assert.throwsAsync(config.read(), { code: "ENOENT" });
 });
 
 avaTest("Read a config with a default Payload", async(assert) => {
@@ -369,8 +364,10 @@ avaTest("Read a corrupted json", async(assert) => {
         defaultSchema: configSchemaJSON
     });
 
-    const error = await assert.throws(config.read(), Error);
-    assert.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
+    await assert.throwsAsync(config.read(), {
+        instanceOf: Error,
+        message: "Config.payload - Failed to validate new configuration, err => property .foo should be string\n"
+    });
     assert.deepEqual(config.payload, Object.create(null));
     assert.is(config.configHasBeenRead, false);
 });
@@ -426,10 +423,9 @@ avaTest("Setup autoReload error before config has been read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.setupAutoReload();
-    }, Error);
-    assert.is(error.message, "Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!");
+    }, { instanceOf: Error, message: "Config.setupAutoReaload - cannot setup autoReload when the config has not been read yet!" });
 });
 
 avaTest("Setup autoReload twice for return", async(assert) => {
@@ -448,10 +444,9 @@ avaTest("Get config filedPath error before read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.get("foo");
-    }, Error);
-    assert.is(error.message, "Config.get - Unable to get a key, the configuration has not been initialized yet!");
+    }, { instanceOf: Error, message: "Config.get - Unable to get a key, the configuration has not been initialized yet!" });
 });
 
 avaTest("Get config filedPath error without string", async(assert) => {
@@ -459,20 +454,18 @@ avaTest("Get config filedPath error without string", async(assert) => {
     assertConfigTypesAndValues(assert, config);
 
     await config.read();
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.get(10);
-    }, TypeError);
-    assert.is(error.message, "Config.get->fieldPath should be typeof <string>");
+    }, { instanceOf: TypeError, message: "Config.get->fieldPath should be typeof <string>" });
 });
 
 avaTest("Set config key error before read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.set("foo", "Hello");
-    }, Error);
-    assert.is(error.message, "Config.set - Unable to set a key, the configuration has not been initialized yet!");
+    }, { instanceOf: Error, message: "Config.set - Unable to set a key, the configuration has not been initialized yet!" });
 });
 
 avaTest("Set config filedPath error without string", async(assert) => {
@@ -480,10 +473,9 @@ avaTest("Set config filedPath error without string", async(assert) => {
     assertConfigTypesAndValues(assert, config);
 
     await config.read();
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.set(10);
-    }, TypeError);
-    assert.is(error.message, "Config.set->fieldPath should be typeof <string>");
+    }, { instanceOf: TypeError, message: "Config.set->fieldPath should be typeof <string>" });
 });
 
 avaTest("Write on set", async(assert) => {
@@ -557,8 +549,10 @@ avaTest("Read defaultPayload should be a plainObject (if not undefined)", async(
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = await assert.throws(config.read(10), TypeError);
-    assert.is(error.message, "defaultPayload argument should be a plain JavaScript Object!");
+    await assert.throwsAsync(config.read(10), {
+        instanceOf: TypeError,
+        message: "defaultPayload argument should be a plain JavaScript Object!"
+    });
 });
 
 avaTest("Re-write configFile property after Config construction", async(assert) => {
@@ -566,44 +560,48 @@ avaTest("Re-write configFile property after Config construction", async(assert) 
     assertConfigTypesAndValues(assert, config);
     config.configFile = undefined;
 
-    const error = await assert.throws(config.read(), TypeError);
-    assert.is(error.message, "Config.read - configFile should be typeof <string>");
+    await assert.throwsAsync(config.read(), {
+        instanceOf: TypeError,
+        message: "Config.read - configFile should be typeof <string>"
+    });
 });
 
 avaTest("Write on disk error before read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = await assert.throws(config.writeOnDisk(), Error);
-    assert.is(error.message, "Config.writeOnDisk - Cannot write unreaded configuration on the disk");
+    await assert.throwsAsync(config.writeOnDisk(), {
+        instanceOf: Error,
+        message: "Config.writeOnDisk - Cannot write unreaded configuration on the disk"
+    });
 });
 
 avaTest("observableOf fieldPath should be a string!", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.observableOf(10);
-    }, TypeError);
-    assert.is(error.message, "Config.observableOf->fieldPath should be typeof <string>");
+    }, { instanceOf: TypeError, message: "Config.observableOf->fieldPath should be typeof <string>" });
 });
 
 avaTest("Can't close config if read has not been triggered before!", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = await assert.throws(config.close(), Error);
-    assert.is(error.message, "Config.close - Cannot close unreaded configuration");
+    await assert.throwsAsync(config.close(), {
+        instanceOf: Error,
+        message: "Config.close - Cannot close unreaded configuration"
+    });
 });
 
 avaTest("Can't lazyWriteDisk if config has not been read", async(assert) => {
     const { config } = await createNewConfiguration();
     assertConfigTypesAndValues(assert, config);
 
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.lazyWriteOnDisk();
-    }, Error);
-    assert.is(error.message, "Config.lazyWriteOnDisk - Cannot lazy write unreaded configuration on the disk");
+    }, { instanceOf: Error, message: "Config.lazyWriteOnDisk - Cannot lazy write unreaded configuration on the disk" });
 });
 
 avaTest("Closed configuration should not be hot reloaded!", async(assert) => {
@@ -632,10 +630,12 @@ avaTest("Config set invalid value", async(assert) => {
     assertConfigTypesAndValues(assert, config);
 
     await config.read();
-    const error = assert.throws(() => {
+    assert.throws(() => {
         config.set("foo", 10);
-    }, Error);
-    assert.is(error.message, "Config.payload - Failed to validate new configuration, err => property .foo should be string\n");
+    }, {
+        instanceOf: Error,
+        message: "Config.payload - Failed to validate new configuration, err => property .foo should be string\n"
+    });
 });
 
 avaTest("limitObjectDepth", (assert) => {
