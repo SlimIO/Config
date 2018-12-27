@@ -37,6 +37,8 @@
     "SlimIO",
     "Config",
     "JSON",
+    "Schema",
+    "Safe",
     "Loader"
   ],
   "author": "SlimIO",
