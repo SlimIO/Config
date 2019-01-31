@@ -39,7 +39,10 @@
     "JSON",
     "Schema",
     "Safe",
-    "Loader"
+    "Loader",
+    "observable",
+    "reactive",
+    "hotreload"
   ],
   "author": "SlimIO",
   "license": "MIT",
