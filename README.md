@@ -71,7 +71,7 @@ Configuration class is extended by a [Node.js EventEmitter](https://nodejs.org/a
 | close | Event triggered when the configuration is asked to be closed |
 
 ## API
-This section describe how works the methods of **Config** class. For a complete definition, take a look at the root file `index.d.ts` !
+This section describe how works the methods of **Config** class. For a complete definition, take a look at `index.d.ts` !
 
 <details><summary>constructor< T > (configFilePath: string, options?: Config.Options)</summary>
 <br />
