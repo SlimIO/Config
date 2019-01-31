@@ -233,6 +233,6 @@ The default value is the following Object:
 ```
 </details>
 
-## Licence
+## License
 MIT
 
