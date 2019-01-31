@@ -14,6 +14,9 @@ SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core
 - Reactive with observable key(s)
 - Safe with [JSON Schema](https://json-schema.org/) validation
 
+## Requirements
+Node.js version 10 and upper are required to run this project. **We do not provide support** for previous versions.
+
 ## Getting Started
 
 This package is available in the Node Package Repository and can be easily installed with [npm](https://docs.npmjs.com/getting-started/what-is-npm) or [yarn](https://yarnpkg.com).
@@ -232,6 +235,9 @@ The default value is the following Object:
 }
 ```
 </details>
+
+## Contributions Guidelines
+TBC
 
 ## License
 MIT
