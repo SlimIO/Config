@@ -1,11 +1,12 @@
 # Config
 
+![V0.13.0](https://img.shields.io/badge/version-0.13.0-blue.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SlimIO/Config/commit-activity)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Config/blob/master/LICENSE)
 [![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Config/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Config?targetFile=package.json)
 [![CircleCI](https://circleci.com/gh/SlimIO/Config/tree/master.svg?style=svg)](https://circleci.com/gh/SlimIO/Config/tree/master) [![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Config.svg)](https://greenkeeper.io/)
 
-SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core and addons to safely hot reload configuration upon JSON Schema.
+SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core and addons to safely hot reload configuration upon [JSON Schema](https://json-schema.org/).
 
 ## Features
 
@@ -60,7 +61,7 @@ main().catch(console.error);
 > **Note:** config.json should exist (if not, it will throw an Error). Look at `createOnNoEntry` option for more information !
 
 ## Events
-Configuration class is extended by a Node.js EventEmitter. The class can trigger several events:
+Configuration class is extended by a [Node.js EventEmitter](https://nodejs.org/api/events.html). The class can trigger several events:
 
 | event name | description |
 | --- | --- |
@@ -70,9 +71,12 @@ Configuration class is extended by a Node.js EventEmitter. The class can trigger
 | close | Event triggered when the configuration is asked to be closed |
 
 ## API
+This section describe how works the methods of **Config** class. For a complete definition, take a look at the root file `index.d.ts` !
 
-### constructor< T >(configFilePath: string, options?: Config.ConstructorOptions)
-Create a new Configuration instance
+<details><summary>constructor< T > (configFilePath: string, options?: Config.Options)</summary>
+<br />
+
+Create a new Config Object:
 ```js
 const cfg = new Config("./path/to/file.json", {
     createOnNoEntry: true,
@@ -92,7 +96,11 @@ Available options are:
 
 > **Note**: When no schema is provided, it will search for a file prefixed by `.schema` with the same config name.
 
-### read(defaultPayload?: T): Promise< this >;
+</details>
+
+<details><summary>read (defaultPayload?: T): Promise< this ></summary>
+<br />
+
 Will trigger and read the local configuration (on disk). A default `payload` value can be provided in case the file doesn't exist !
 
 ```js
@@ -108,19 +116,22 @@ Retriggering the method will made an hot-reload of all properties. For a cold re
 
 > **Warning** When the file doesn't exist, the configuration is written at the next loop iteration (with lazyWriteOnDisk).
 
-<p align="center">
-    <img src="https://i.imgur.com/uMY4DZV.png" height="500">
-</p>
+<p align="center"><img src="https://i.imgur.com/uMY4DZV.png" height="500"></p>
 
-### setupAutoReload(): void;
+</details>
+
+<details><summary>setupAutoReload (): void</summary>
+<br />
+
 Setup hot reload (with a file watcher). This method is automatically triggered if the Configuration has been created with the option `autoReload` set to true.
 
 We use the package [node-watch](https://www.npmjs.com/package/node-watch) to achieve the hot reload.
+</details>
 
-### get< H >(fieldPath: string, depth?: number): H
-Get a value from a key (field path).
+<details><summary>get< H > (fieldPath: string, depth?: number): H</summary>
+<br />
 
-For example, image a json file with a `foo` field.
+Get a value from a key (fieldPath). For example, let take a json payload with a root `foo` field.
 ```js
 const cfg = new Config("./path/to/file.json");
 await cfg.read();
@@ -130,8 +141,11 @@ const fooValue = cfg.get("foo");
 > Under the hood the method work with `lodash.get` function.
 
 If the retrieved value is a JavaScript object, you can limit the depth by setting `depth` option.
+</details>
 
-### set< H >(fieldPath: string, fieldValue: H): void;
+<details><summary>set< H > (fieldPath: string, fieldValue: H): void</summary>
+<br />
+
 Set a given field in the configuration.
 
 ```js
@@ -146,7 +160,11 @@ await cfg.writeOnDisk();
 
 > Under the hood the method work with `lodash.set` function.
 
-### observableOf(fieldPath: string, depth?: number): ObservableLike;
+</details>
+
+<details><summary>observableOf (fieldPath: string, depth?: number): ObservableLike</summary>
+<br />
+
 Observe a given configuration key with an Observable Like object!
 
 ```js
@@ -164,11 +182,17 @@ cfg.observableOf("foo").subscribe(console.log);
 const newPayload = { foo: "world" };
 await writeFile("./config.json", JSON.stringify(newPayload, null, 4));
 ```
+</details>
 
-### writeOnDisk(): Promise< void >
+<details><summary>writeOnDisk (): Promise< void ></summary>
+<br />
+
 Write the configuration on the disk.
+</details>
 
-### lazyWriteOnDisk(): void
+<details><summary>lazyWriteOnDisk (): void</summary>
+<br />
+
 Write the configuration on the disk (only at the next event-loop iteration). Use the event `configWritten` to known when the configuration will be written.
 
 ```js
@@ -182,16 +206,22 @@ cfg.once("configWritten", () => {
 cfg.lazyWriteOnDisk();
 ```
 
-### close(): Promise< void >
+</details>
+
+<details><summary>close (): Promise< void ></summary>
+<br />
+
 Close (and write on disk) the configuration (it will close the watcher and complete/clean all active observers subscribers).
+</details>
 
-## Properties
+### Properties
+Following properties are **static** members of **Config** class.
 
-### STRINGIFY_SPACE
+<details><summary>STRINGIFY_SPACE</summary>
 The `STRINGIFY_SPACE` property allow you to redine the espace used internaly for `JSON.stringify` method. The default value is **4**.
+</details>
 
-### DEFAULT_SCHEMA
-
+<details><summary>DEFAULT_SCHEMA</summary>
 The `DEFAULT_SCHEMA` property allow you to redefine the default schema that should be applied if no schema is provided when constructor is triggered!
 
 The default value is the following Object:
@@ -201,3 +231,8 @@ The default value is the following Object:
     additionalProperties: true
 }
 ```
+</details>
+
+## Licence
+MIT
+
