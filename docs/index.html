@@ -1,247 +1,375 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!doctype html>
+<html class="default no-js">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
-    <link href="./black.css" rel="stylesheet">
-    <title>Config specification</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>&#x27;Config&#x27;</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
-    <h1>Configuration</h1>
-    <section class="note">
-        <p class="title">Note</p>
-        <p>The config class is extended by the Node.JS events module</p>
-    </section>
-    <section class="tab">
-        <h2>1.0.0 <span>[[constructor]]</span>( <a>configFilePath</a> [, <a>options</a>] )</h2>
-        <p class="desc">Create a new instance of Config class JavaScript Object.</p>
-        <ul>
-            <li>Call <span>[[super]]</span></li>
-            <li>Unless <b>Type</b>(<a>configFilePath</a>) is equal to <b class="string">"string"</b>, throw a <b>TypeError</b> exception.</li>
-            <li>If <a>options</a> is not present, then</li>
-            <ul class="sub">
-                <li>Let <a>options</a> be <b>Object</b>(<b class="prim">null</b>)</li>
-            </ul>
-            <li><i>Throw TypeError</i>Call <b>path.parse</b>(<a>configFilePath</a>) and let <a>parseResult</a> be the result.</li>
-            <li>Let <a>ext</a> be ? <b>getObjectProperty</b>(<a>parseResult</a>, <b class="string">"ext"</b>).</li>
-            <li>Let <a>dir</a> be ? <b>getObjectProperty</b>(<a>parseResult</a>, <b class="string">"dir"</b>).</li>
-            <li>Let <a>name</a> be ? <b>getObjectProperty</b>(<a>parseResult</a>, <b class="string">"name"</b>).</li>
-            <li>Unless <b>Value</b>(<a>ext</a>) is equal to <b>String</b>(<b class="string">".json"</b>), throw an <b>Error</b> exception</li>
-            <li>Let <span>[[this]]</span>.<a>configFile</a> be ? <b>Value</b>(<a>configFilePath</a>)</li>
-            <li><i>Throw TypeError</i>Call <b>path.extname</b>(<a>name</a>) and let <a>nameExt</a> be the result.</li>
-            <li>If <b>Value</b>(<a>nameExt</a>) is equal to <b>String</b>(<b class="string">".schema"</b>), Then</li>
-            <ul class="sub">
-                <li>let <span>[[this]]</span>.<a>configFile</a> be ? <b>String</b>(<b class="string">"${<a>dir</a>}/${<a>name</a>}${<a>ext</a>}"</b>)</li>
-            </ul>
-            <li>Else,</li>
-            <ul class="sub">
-                <li>let <span>[[this]]</span>.<a>configFile</a> be ? <b>String</b>(<b class="string">"${<a>dir</a>}/${<a>name</a>}.schema${<a>ext</a>}"</b>)</li>
-            </ul>
-            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>) be ? <b class="prim">null</b></li>
-            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"schema"</b>) be ? <b class="prim">null</b></li>
-            <li>Let <span>[[this]]</span>.<a>createOnNoEntry</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"createOnNoEntry"</b>) or <b class="prim">false</b></li>
-            <li>Let <span>[[this]]</span>.<a>autoReload</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"autoReload"</b>) or <b class="prim">false</b></li>
-            <li>Let <span>[[this]]</span>.<a>autoReloadActivated</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"autoReloadActivated"</b>) or <b class="prim">false</b></li>
-            <li>Let <span>[[this]]</span>.<a>reloadDelay</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"reloadDelay"</b>) or <b class="prim">1000</b></li>
-            <li>Let <span>[[this]]</span>.<a>writeOnSet</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"writeOnSet"</b>) or <b class="prim">false</b></li>
-            <li>Let <span>[[this]]</span>.<a>configHasBeenRead</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"configHasBeenRead"</b>) or <b class="prim">false</b></li>
-            <li>Let <span>[[this]]</span>.<a>subscriptionObservers</a> be ? The result of <b>Array</b>()</li>
-            <li>If <b>objectHasProperty</b>(<a>options</a>, <b class="string">"defaultSchema"</b>), Then</li>
-            <ul class="sub">
-                <li>Let <span>[[this]]</span>.<a>defaultSchema</a> be ? The result of <b>getObjectProperty</b>(<a>options</a>, <b class="string">"defaultSchema"</b>)</li>
-            </ul>
-        </ul>
-        <hr>
-        <h2>1.0.1 read( <a>defaultPayload</a> : <b class="prim">Object</b> ) : <b class="prim">Promise&lt;<a>this</a>&gt;</b></h2>
-        <p class="desc">Read the configuration file (And optionaly apply a default payload value if the file doesn't exist)</p>
-        <ul>
-            <li>Let <a>JSONConfig</a> and <a>JSONSchema</a> be <b class="prim">undefined</b></li>
-            <li>Try</li>
-            <ul class="sub">
-                <li><i>Throw Exception</i>Call <b>fs.access</b>(<span>[[this]]</span>.<a>configFile</a>, READ_OK | WRITE_OK)</li>
-                <li>Call <b>fs.readFile</b>(<span>[[this]]</span>.<a>configFile</a>) and let <a>buf</a> be the result.</li>
-                <li>Let <a>JSONConfig</a> be ? <b>JSON.parse</b>(<b>toString</b>(<a>buf</a>))</li>
-            </ul>
-            <li>Catch(<a>error</a>)</li>
-            <ul class="sub">
-                <li>Let <a>code</a> be ? <b>getObjectProperty</b>(<a>error</a>, <b class="string">"code"</b>)</li>
-                <li>If <span>[[this]]</span>.<a>createOnNoEntry</a> is <b class="prim">false</b> and <a>code</a> is not equal to <b>String</b>(<b class="string">"ENOENT"</b>), then</li>
-                <ul class="sub">
-                    <li>Throw exception <a>error</a></li>
-                </ul>
-                <li>Call <b>is.Object</b>(<a>defaultPayload</a>) and let <a>pt</a> be the result.</li>
-                <li>If <a>pt</a> is equal to <b class="prim">true</b>, then</li>
-                <ul class="sub">
-                    <li>Let <a>JSONConfig</a> be <b>Value</b>(<a>defaultPayload</a>)</li>
-                </ul>
-                <li>Else,</li>
-                <ul class="sub">
-                    <li>Call <b>is.nullOrUndefined</b>(<span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>)) and let <a>payloadDefined</a> be the result</li>
-                    <li>If <a>payloadDefined</a> is equal to <b class="prim">true</b>, then</li>
-                    <ul class="sub">
-                        <li>Let <a>JSONConfig</a> be ? <b>Object</b>(<b class="prim">null</b>)</li>
-                    </ul>
-                    <li>Else,</li>
-                    <ul class="sub">
-                        <li>Let <a>JSONConfig</a> be <a>self.payload</a></li>
-                    </ul>
-                </ul>
-                <li><i>Warning !</i>Call <b>fs.writeFile</b>(<span>[[this]]</span>.<a>configFile</a>, <b>JSON.stringify</b>(<a>JSONConfig</a>))</li>
-            </ul>
-            <li>Try</li>
-            <ul class="sub">
-                <li><i>Throw Exception</i>Call <b>fs.access</b>(<span>[[this]]</span>.<a>schemaFile</a>, READ_OK)</li>
-                <li>Call <b>fs.readFile</b>(<span>[[this]]</span>.<a>schemaFile</a>) and let <a>buf</a> be the result.</li>
-                <li>Let <a>JSONSchema</a> be ? <b>JSON.parse</b>(<b>toString</b>(<a>buf</a>))</li>
-            </ul>
-            <li>Catch(<a>error</a>)</li>
-            <ul class="sub">
-                <li>Let <a>code</a> be ? <b>getObjectProperty</b>(<a>error</a>, <b class="string">"code"</b>)</li>
-                <li>Unless <a>code</a> is equal to <b>String</b>(<b class="string">"ENOENT"</b>), then</li>
-                <ul class="sub">
-                    <li>Throw exception <a>error</a></li>
-                </ul>
-                <li>Call <b>is.nullOrUndefined</b>(<span>[[this]]</span>.<a>defaultSchema</a>) and let <a>payloadDefined</a> be the result</li>
-                <li>If <a>payloadDefined</a> is equal to <b class="prim">true</b>, then</li>
-                <ul class="sub">
-                    <li>Let <a>JSONSchema</a> be <b>Value</b>(Config.DEFAULTSchema)</li>
-                </ul>
-                <li>Else,</li>
-                <ul class="sub">
-                    <li>Let <a>JSONSchema</a> be <span>[[this]]</span>.<a>defaultSchema</a></li>
-                </ul>
-            </ul>
-            <li><i>Warning !</i>Call <b>ajv.compile</b>(<a>JSONSchema</a>) and let <a>schemaValidator</a> be the result.</li>
-            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"schema"</b>) be <a>schemaValidator</a></li>
-            <li>Let <span>[[this]]</span>.<a>configHasBeenRead</a> be <b class="prim">true</b></li>
-            <li>Let <span>[[this]]</span>.<a>payload</a> be <a>JSONConfig</a></li>
-            <li>If <span>[[this]]</span>.<a>autoReload</a> is equal to <b class="prim">true</b>, then</li>
-            <ul class="sub">
-                <li>Call <span>[[this]]</span><b>.setupAutoReload</b>()</li>
-            </ul>
-            <li>Return <span>[[this]]</span></li>
-        </ul>
-        <hr>
-        <h2>1.0.2 setupAutoReload( ) : <b class="prim">void</b></h2>
-        <p class="desc">Setup configuration autoReload</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
-            <li>If <span>[[this]]</span>.<a>autoReloadActivated</a> is equal to <b class="prim">true</b>, then</li>
-            <ul class="sub">
-                <li>Return <b class="prim">void</b></li>
-            </ul>
-            <li>Let <span>[[this]]</span><a>.autoReloadActivated</a> be <b class="prim">true</b></li>
-            <li>Let <a>callback</a> be the following set of instructions</li>
-            <ul class="sub">
-                <li>await Call <span>[[this]]</span>.read()</li>
-                <li>Call <span>[[this]]</span>.emit(<b class="string">"ready"</b>)</li>
-            </ul>
-            <li><i>Warning !</i>Let <span>[[this]]</span><a>.watcher</a> be ? <b>watcher</b>(<a>self.configFile</a>, { delay: <a>self.reloadDelay</a> }, <a>calback</a>)</li>
-            <li>Return <b class="prim">void</b></li>
-        </ul>
-        <section class="note">
-            <p class="title">Note 1</p>
-            <p>The npm package <b>node-watch</b> is used to create a perfect system update hook on all major OS.</p>
-        </section>
-        <hr>
-        <h2>1.0.3 get<<b class="prim">T</b>>( <a>fieldPath</a> : <b class="prim">string</b> ) : <b class="prim">T</b></h2>
-        <p class="desc">Retrieve a given value (with the field path) in the current loaded configuration payload</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
-            <li>Unless <b>Type</b>(<a>fieldPath</a>) is equal to <b class="string">"string"</b>, throw a <b>TypeError</b> exception.</li>
-            <li><i>Warning !</i>Call <b>lodash.get</b>(<span>[[this]]</span>.<a>payload</a>, <a>fieldPath</a>) and let <a>ret</a> be the result.</li>
-            <li>Return <a>ret</a>.</li>
-        </ul>
-        <section class="note">
-            <p class="title">Note 1</p>
-            <p>The getter <a>payload</a> return a <b>deepClone</b> of the current loaded configuration.</p>
-        </section>
-        <hr>
-        <h2>1.0.3 set<<b class="prim">T</b>>( <a>fieldPath</a> : <b class="prim">string</b> , <a>fieldValue</a> : <b class="prim">T</b> ) : <b class="prim">void</b></h2>
-        <p class="desc">Set a field in the current loaded configuration payload</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
-            <li>Unless <b>Type</b>(<a>fieldPath</a>) is equal to <b class="string">"string"</b>, throw a <b>TypeError</b> exception.</li>
-            <li>Call <b>lodash.set</b>(<span>[[this]]</span>.<a>payload</a>, <a>fieldPath</a>, <a>fieldValue</a>) and let <a>setProperty</a> be the result</li>
-            <li>Let <span>[[this]]</span>.<a>payload</a> be <a>setProperty</a></li>
-            <li>If <span>[[this]]</span>.<a>writeOnSet</a> is equal to <b class="prim">true</b>, then</li>
-            <ul class="sub">
-                <li>Let <a>callback</a> be the following set of instructions</li>
-                <ul class="sub">
-                    <li>Call <span>[[this]]</span>.writeOnDisk()</li>
-                </ul>
-                <li><b>setImmediate</b>(<a>callback</a>);</li>
-            </ul>
-            <li>Return <b class="prim">void</b></li>
-        </ul>
-        <hr>
-        <h2>1.0.4 writeOnDisk( ) : <b class="prim">Promise</b>&lt;<b class="prim">void</b>&gt;</h2>
-        <p class="desc">Write the current configuration payload on the Disk</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
-            <li><i>Throw Exception</i>Call <b>fs.access</b>(<span>[[this]]</span>.<a>configFile</a>, WRITE_OK)</li>
-            <li>Let <a>O</a> be the result of <b>JSON.stringify</b>(<span>[[this]]</span>.<a>payload</a>)</li>
-            <li>Call <b>fs.writeFile</b>(<span>[[this]]</span>.<a>configFile</a>, <a>O</a>)</li>
-            <li>Return <b class="prim">void</b></li>
-        </ul>
-        <hr>
-        <h2>1.0.5 close( ) : <b class="prim">Promise</b>&lt;<b class="prim">void</b>&gt;</h2>
-        <p class="desc">Close (and write on disk) the configuration (it will close the watcher and clean all active observers).</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
-            <li>Call <span>[[this]]</span>.<a>watcher</a>.<b>isClosed</b>() and let <a>watcherClosed</a> be the result.</li>
-            <li>If <span>[[this]]</span>.<a>autoReloadActivated</a> is equal to <b class="prim">true</b> and <a>watcherClosed</a> is equal to <b class="prim">false</b>, then</li>
-            <ul class="sub">
-                <li><i>Warning !</i>Call <span>[[this]]</span>.<a>watcher</a>.<b>close</b>()</li>
-                <li>Let <span>[[this]]</span>.<a>autoReloadActivated</a> be <b class="prim">false</b></li>
-            </ul>
-            <li>await Call <span>[[this]]</span>.writeOnDisk()</li>
-            <li>Iterate [<a>index</a>, <a>subscriptionObservers</a>] of <span>[[this]]</span>.<a>subscriptionObservers</a></li>
-            <ul class="sub">
-                <li>Call <a>subscriptionObservers</a>.complete()</li>
-                <li>Call <span>[[this]]</span>.<a>subscriptionObservers</a>.<b>splice</b>(<a>index</a>, <b class="prim">1</b>)</li>
-            </ul>
-            <li>Return <b class="prim">void</b></li>
-        </ul>
-        <hr>
-        <h2>10.0.6 observableOf( <a>fieldPath</a> : <b class="prim">string</b> ) : <b class="prim">Observable</b></h2>
-        <p class="desc">Observe a given configuration key with an Observable object!</p>
-        <ul>
-            <li><i>Throw Exception</i>Call <span>[[this]]</span>.get(<a>fieldPath</a>) and let <a>ret</a> be the result.</li>
-            <li>Return <b class="prim">Observable</b>(<a>ret</a>)</li>
-        </ul>
-        <hr>
-        <h2>10.0.7 get payload( ) : <b class="prim">Object</b></h2>
-        <p class="desc">Get a payload Object clone (or null if the configuration has not been read yet)</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, then</li>
-            <ul class="sub">
-                <li>Return <b>Object</b>(<b class="prim">null</b>)</li>
-            </ul>
-            <li>Call <b>lodash.clonedeep</b>(<span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>)) and let <a>ret</a> be the result</li>
-            <li>Return <a>ret</a></li>
-        </ul>
-        <hr>
-        <h2>10.0.8 set payload( <a>newPayload</a> : <b class="prim">Object</b> ) : <b class="prim">void</b></h2>
-        <p class="desc">Set a new payload Object</p>
-        <ul>
-            <li>If <span>[[this]]</span>.<a>configHasBeenRead</a> is equal to <b class="prim">false</b>, Throw an <b>Error</b> exception.</li>
-            <li>Unless <b>Type</b>(<a>newPayload</a>) is equal to <b class="string">"Object"</b>, Throw a <b>TypeError</b> exception.</li>
-            <li>Call <b>lodash.clonedeep</b>(<a>newPayload</a>) and let <a>tempPayload</a> be the result</li>
-            <li>If <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"schema"</b>)(<a>tempPayload</a>) is equal to <b class="prim">false</b>, then</li>
-            <ul class="sub">
-                <li>Throw a <b>Error</b> exception</li>
-            </ul>
-            <li>Let <span>[[this]]</span>.<b>Symbol</b>(<b class="string">"payload"</b>) be <a>tempPayload</a></li>
-            <li>Iterate [<a>fieldPath</a>, <a>subscriptionObservers</a>] of <span>[[this]]</span>.<a>subscriptionObservers</a></li>
-            <ul class="sub">
-                <li>Call <span>[[this]]</span>.get(<a>fieldPath</a>) and let <a>next</a> be the result.</li>
-                <li>Call <a>subscriptionObservers</a>.next(<a>next</a>)</li>
-            </ul>
-            <li>Return <b class="prim">void</b></li>
-        </ul>
-    </section>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">&#x27;Config&#x27;</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> &#x27;Config&#x27;</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="config">Config</h1>
+				<p><img src="https://img.shields.io/badge/version-0.13.0-blue.svg" alt="V0.13.0">
+					<a href="https://github.com/SlimIO/Config/commit-activity"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
+					<a href="https://github.com/SlimIO/Config/blob/master/LICENSE"><img src="https://img.shields.io/github/license/Naereen/StrapDown.js.svg" alt="GitHub license"></a>
+					<a href="https://snyk.io/test/github/SlimIO/Config?targetFile=package.json"><img src="https://snyk.io/test/github/SlimIO/Config/badge.svg?targetFile=package.json" alt="Known Vulnerabilities"></a>
+				<a href="https://circleci.com/gh/SlimIO/Config/tree/master"><img src="https://circleci.com/gh/SlimIO/Config/tree/master.svg?style=svg" alt="CircleCI"></a> <a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/SlimIO/Config.svg" alt="Greenkeeper badge"></a></p>
+				<p>SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core and addons to safely hot reload configuration upon <a href="https://json-schema.org/">JSON Schema</a>.</p>
+				<h2 id="features">Features</h2>
+				<ul>
+					<li>Hot-reloading of configuration</li>
+					<li>Reactive with observable key(s)</li>
+					<li>Safe with <a href="https://json-schema.org/">JSON Schema</a> validation</li>
+				</ul>
+				<h2 id="requirements">Requirements</h2>
+				<p>Node.js version 10 and upper are required to run this project. <strong>We do not provide support</strong> for previous versions.</p>
+				<h2 id="getting-started">Getting Started</h2>
+				<p>This package is available in the Node Package Repository and can be easily installed with <a href="https://docs.npmjs.com/getting-started/what-is-npm">npm</a> or <a href="https://yarnpkg.com">yarn</a>.</p>
+				<pre><code class="language-bash">$ npm i @slimio/config
+<span class="hljs-comment"># or</span>
+$ yarn add @slimio/config</code></pre>
+				<h2 id="usage-example">Usage example</h2>
+				<p>Create a simple json file for your project (As below)</p>
+				<pre><code class="language-json">{
+    <span class="hljs-attr">"loglevel"</span>: <span class="hljs-number">5</span>,
+    <span class="hljs-attr">"logsize"</span>: <span class="hljs-number">4048</span>,
+    <span class="hljs-attr">"login"</span>: <span class="hljs-string">"administrator"</span>
+}</code></pre>
+				<p>Now, create a new Configuration instance and read it</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> Config = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@slimio/config"</span>);
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">main</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./path/to/config.json"</span>);
+    <span class="hljs-keyword">await</span> cfg.read();
+    <span class="hljs-built_in">console</span>.log(cfg.get(<span class="hljs-string">"loglevel"</span>)); <span class="hljs-comment">// stdout: 5</span>
+
+    <span class="hljs-comment">// Observe (with an Observable Like) the update made to login property</span>
+    cfg.observableOf(<span class="hljs-string">"login"</span>).subscribe(<span class="hljs-built_in">console</span>.log);
+    cfg.set(<span class="hljs-string">"login"</span>, <span class="hljs-string">"admin"</span>);
+
+    <span class="hljs-comment">// Payload getter will return a deepClone with all configuration properties</span>
+    <span class="hljs-built_in">console</span>.log(cfg.payload);
+
+    <span class="hljs-keyword">await</span> cfg.close();
+}
+main().catch(<span class="hljs-built_in">console</span>.error);</code></pre>
+				<blockquote>
+					<p><strong>Note:</strong> config.json should exist (if not, it will throw an Error). Look at <code>createOnNoEntry</code> option for more information !</p>
+				</blockquote>
+				<h2 id="events">Events</h2>
+				<p>Configuration class is extended by a <a href="https://nodejs.org/api/events.html">Node.js EventEmitter</a>. The class can trigger several events:</p>
+				<table>
+					<thead>
+						<tr>
+							<th>event name</th>
+							<th>description</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td>configWritten</td>
+							<td>The configuration payload has been written on the local disk</td>
+						</tr>
+						<tr>
+							<td>watcherInitialized</td>
+							<td>The file watcher has been initialized (it will hot reload the configuration on modification)</td>
+						</tr>
+						<tr>
+							<td>reload</td>
+							<td>The configuration has been hot reloaded successfully</td>
+						</tr>
+						<tr>
+							<td>close</td>
+							<td>Event triggered when the configuration is asked to be closed</td>
+						</tr>
+				</tbody></table>
+				<h2 id="api">API</h2>
+				<p>This section describe how works the methods of <strong>Config</strong> class. For a complete definition, take a look at <code>index.d.ts</code> !</p>
+				<details><summary>constructor< T > (configFilePath: string, options?: Config.Options)</summary>
+					<br />
+					<p>Create a new Config Object:</p>
+					<pre><code class="language-js"><span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./path/to/file.json"</span>, {
+    <span class="hljs-attr">createOnNoEntry</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">autoReload</span>: <span class="hljs-literal">true</span>
+});</code></pre>
+					<p>Available options are:</p>
+					<table>
+						<thead>
+							<tr>
+								<th>name</th>
+								<th>type</th>
+								<th>default value</th>
+								<th>description</th>
+							</tr>
+						</thead>
+						<tbody><tr>
+								<td>createOnNoEntry</td>
+								<td>boolean</td>
+								<td>false</td>
+								<td>Create the file with default payload value if he doesn&#39;t exist on the local disk</td>
+							</tr>
+							<tr>
+								<td>writeOnSet</td>
+								<td>boolean</td>
+								<td>false</td>
+								<td>Write the file on the disk after each time .set() is called</td>
+							</tr>
+							<tr>
+								<td>autoReload</td>
+								<td>boolean</td>
+								<td>false</td>
+								<td>Setup hot reload of the configuration file</td>
+							</tr>
+							<tr>
+								<td>reloadDelay</td>
+								<td>number</td>
+								<td>500ms</td>
+								<td>The delay to wait before hot reloading the configuration, it&#39;s a security to avoid event spamming</td>
+							</tr>
+							<tr>
+								<td>defaultSchema</td>
+								<td>plainObject</td>
+								<td>null</td>
+								<td>The default JSON Schema for the configuration</td>
+							</tr>
+					</tbody></table>
+					<blockquote>
+						<p><strong>Note</strong>: When no schema is provided, it will search for a file prefixed by <code>.schema</code> with the same config name.</p>
+					</blockquote>
+				</details>
+				<details><summary>read (defaultPayload?: T): Promise< this ></summary>
+					<br />
+					<p>Will trigger and read the local configuration (on disk). A default <code>payload</code> value can be provided in case the file doesn&#39;t exist !</p>
+					<pre><code class="language-js"><span class="hljs-keyword">const</span> { strictEqual } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"assert"</span>);
+
+<span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./path/to/file.json"</span>);
+strictEqual(cfg.configHasBeenRead, <span class="hljs-literal">false</span>); <span class="hljs-comment">// true</span>
+<span class="hljs-keyword">await</span> cfg.read();
+strictEqual(cfg.configHasBeenRead, <span class="hljs-literal">true</span>); <span class="hljs-comment">// true</span></code></pre>
+					<p>Retriggering the method will made an hot-reload of all properties. For a cold reload you will have to close the configuration before.</p>
+					<blockquote>
+						<p><strong>Warning</strong> When the file doesn&#39;t exist, the configuration is written at the next loop iteration (with lazyWriteOnDisk).</p>
+					</blockquote>
+					<p align="center"><img src="https://i.imgur.com/uMY4DZV.png" height="500"></p>
+				</details>
+				<details><summary>setupAutoReload (): void</summary>
+					<br />
+					<p>Setup hot reload (with a file watcher). This method is automatically triggered if the Configuration has been created with the option <code>autoReload</code> set to true.</p>
+					<p>We use the package <a href="https://www.npmjs.com/package/node-watch">node-watch</a> to achieve the hot reload.</p>
+				</details>
+				<details><summary>get< H > (fieldPath: string, depth?: number): H</summary>
+					<br />
+					<p>Get a value from a key (fieldPath). For example, let take a json payload with a root <code>foo</code> field.</p>
+					<pre><code class="language-js"><span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./path/to/file.json"</span>);
+<span class="hljs-keyword">await</span> cfg.read();
+<span class="hljs-keyword">const</span> fooValue = cfg.get(<span class="hljs-string">"foo"</span>);</code></pre>
+					<blockquote>
+						<p>Under the hood the method work with <code>lodash.get</code> function.</p>
+					</blockquote>
+					<p>If the retrieved value is a JavaScript object, you can limit the depth by setting <code>depth</code> option.</p>
+				</details>
+				<details><summary>set< H > (fieldPath: string, fieldValue: H): void</summary>
+					<br />
+					<p>Set a given field in the configuration.</p>
+					<pre><code class="language-js"><span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./config.json"</span>, {
+    <span class="hljs-attr">createOnNoEntry</span>: <span class="hljs-literal">true</span>
+});
+
+<span class="hljs-keyword">await</span> cfg.read({ <span class="hljs-attr">foo</span>: <span class="hljs-string">"bar"</span> });
+cfg.set(<span class="hljs-string">"foo"</span>, <span class="hljs-string">"hello world!"</span>);
+<span class="hljs-keyword">await</span> cfg.writeOnDisk();</code></pre>
+					<blockquote>
+						<p>Under the hood the method work with <code>lodash.set</code> function.</p>
+					</blockquote>
+				</details>
+				<details><summary>observableOf (fieldPath: string, depth?: number): ObservableLike</summary>
+					<br />
+					<p>Observe a given configuration key with an Observable Like object!</p>
+					<pre><code class="language-js"><span class="hljs-keyword">const</span> { writeFile } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"fs"</span>).promises;
+<span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./config.json"</span>, {
+    <span class="hljs-attr">autoReload</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">createOnNoEntry</span>: <span class="hljs-literal">true</span>
+});
+<span class="hljs-keyword">await</span> cfg.read({ <span class="hljs-attr">foo</span>: <span class="hljs-string">"bar"</span> });
+
+<span class="hljs-comment">// Observe initial and next value(s) of foo</span>
+cfg.observableOf(<span class="hljs-string">"foo"</span>).subscribe(<span class="hljs-built_in">console</span>.log);
+
+<span class="hljs-comment">// Re-write local config file</span>
+<span class="hljs-keyword">const</span> newPayload = { <span class="hljs-attr">foo</span>: <span class="hljs-string">"world"</span> };
+<span class="hljs-keyword">await</span> writeFile(<span class="hljs-string">"./config.json"</span>, <span class="hljs-built_in">JSON</span>.stringify(newPayload, <span class="hljs-literal">null</span>, <span class="hljs-number">4</span>));</code></pre>
+				</details>
+				<details><summary>writeOnDisk (): Promise< void ></summary>
+					<br />
+					<p>Write the configuration on the disk.</p>
+				</details>
+				<details><summary>lazyWriteOnDisk (): void</summary>
+					<br />
+					<p>Write the configuration on the disk (only at the next event-loop iteration). Use the event <code>configWritten</code> to known when the configuration will be written.</p>
+					<pre><code class="language-js"><span class="hljs-keyword">const</span> cfg = <span class="hljs-keyword">new</span> Config(<span class="hljs-string">"./config.json"</span>, {
+    <span class="hljs-attr">createOnNoEntry</span>: <span class="hljs-literal">true</span>
+});
+<span class="hljs-keyword">await</span> cfg.read();
+cfg.once(<span class="hljs-string">"configWritten"</span>, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Configuration written!"</span>);
+});
+cfg.lazyWriteOnDisk();</code></pre>
+				</details>
+				<details><summary>close (): Promise< void ></summary>
+					<br />
+					<p>Close (and write on disk) the configuration (it will close the watcher and complete/clean all active observers subscribers).</p>
+				</details>
+				<h3 id="properties">Properties</h3>
+				<p>Following properties are <strong>static</strong> members of <strong>Config</strong> class.</p>
+				<details><summary>STRINGIFY_SPACE</summary>
+					The `STRINGIFY_SPACE` property allow you to redine the espace used internaly for `JSON.stringify` method. The default value is **4**.
+				</details>
+				<details><summary>DEFAULT_SCHEMA</summary>
+					The `DEFAULT_SCHEMA` property allow you to redefine the default schema that should be applied if no schema is provided when constructor is triggered!
+					<p>The default value is the following Object:</p>
+					<pre><code class="language-js">{
+    <span class="hljs-attr">title</span>: <span class="hljs-string">"CONFIG"</span>,
+    <span class="hljs-attr">additionalProperties</span>: <span class="hljs-literal">true</span>
+}</code></pre>
+				</details>
+				<h2 id="contributions-guidelines">Contributions Guidelines</h2>
+				<p>TBC</p>
+				<h2 id="license">License</h2>
+				<p>MIT</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/config.html" class="tsd-kind-icon">Config</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer>
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>
