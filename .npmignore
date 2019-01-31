@@ -13,3 +13,4 @@ CHANGELOG.md
 .gitignore
 tsconfig.json
 commitlint.config.js
+CHANGELOG.md
