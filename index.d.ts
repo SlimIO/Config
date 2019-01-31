@@ -3,12 +3,9 @@
 
 import * as events from "events";
 
-/**
- * Config class definition
- */
 declare class Config<T> extends events.EventEmitter {
     // Constructor
-    constructor(configFilePath: string, options?: Config.ConstructorOptions);
+    constructor(configFilePath: string, options?: Config.Options);
 
     // Properties
     public configFile: string;
@@ -37,20 +34,14 @@ declare class Config<T> extends events.EventEmitter {
     public close(): Promise<void>;
 }
 
-/**
- * Config namespace
- */
 declare namespace Config {
-
-    // Constructor interface
-    interface ConstructorOptions {
+    interface Options {
         createOnNoEntry?: boolean;
         writeOnSet?: boolean;
         autoReload?: boolean;
         reloadDelay?: number;
         defaultSchema?: object;
     }
-
 }
 
 export as namespace Config;
