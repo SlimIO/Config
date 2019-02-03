@@ -221,10 +221,14 @@ Close (and write on disk) the configuration (it will close the watcher and compl
 Following properties are **static** members of **Config** class.
 
 <details><summary>STRINGIFY_SPACE</summary>
+<br />
+
 The `STRINGIFY_SPACE` property allow you to redine the espace used internaly for `JSON.stringify` method. The default value is **4**.
 </details>
 
 <details><summary>DEFAULT_SCHEMA</summary>
+<br />
+
 The `DEFAULT_SCHEMA` property allow you to redefine the default schema that should be applied if no schema is provided when constructor is triggered!
 
 The default value is the following Object:
