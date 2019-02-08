@@ -1,8 +1,9 @@
 # Config
 
-![V0.13.0](https://img.shields.io/badge/version-0.13.0-blue.svg)
+![version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/SlimIO/Config/master/package.json&query=$.version&label=Version)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SlimIO/Config/commit-activity)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Config/blob/master/LICENSE)
+![size](https://img.shields.io/bundlephobia/min/@slimio/config.svg?style=flat)
 [![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Config/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Config?targetFile=package.json)
 [![Build Status](https://travis-ci.com/SlimIO/Config.svg?branch=master)](https://travis-ci.com/SlimIO/Config)
 [![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Config.svg)](https://greenkeeper.io/)
