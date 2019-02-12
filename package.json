@@ -59,7 +59,7 @@
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/lodash.get": "^4.4.4",
     "@types/lodash.set": "^4.3.4",
-    "@types/node": "^10.12.20",
+    "@types/node": "^11.9.0",
     "@types/zen-observable": "^0.8.0",
     "ava": "^1.2.0",
     "conventional-changelog-cli": "^2.0.11",
