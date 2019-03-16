@@ -57,7 +57,7 @@
     "@escommunity/minami": "^1.0.0",
     "@slimio/eslint-config": "^2.0.3",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/lodash.get": "^4.4.4",
+    "@types/lodash.get": "^4.4.6",
     "@types/lodash.set": "^4.3.4",
     "@types/node": "^11.9.0",
     "@types/zen-observable": "^0.8.0",
