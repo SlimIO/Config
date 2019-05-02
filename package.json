@@ -6,8 +6,8 @@
   "scripts": {
     "prepublishOnly": "pkg-ok",
     "test": "ava --verbose",
-    "doc": "jsdoc -c ./jsdoc.json -r",
-    "coverage": "nyc ava",
+    "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
+    "coverage": "nyc npm test",
     "version": "conventional-changelog -i CHANGELOG.md -s",
     "report": "nyc report --reporter=html",
     "typedoc": "typedoc --out docs --name 'Config' --mode file --includeDeclarations --excludeExternals --hideGenerator --excludePrivate index.d.ts"
