@@ -242,6 +242,19 @@ The default value is the following Object:
 ```
 </details>
 
+## Dependencies
+This project is covered by the SlimIO security policy and undergoes regular security audits.
+
+| Name | Refactoring | Security Risk | Usage |
+| --- | --- | --- | --- |
+| [ajv](https://github.com/epoberezkin/ajv) | ⚠️ Major | Medium | Validate JSON schema. |
+| [@slimio/is](https://github.com/SlimIO/is#readme) | Minor | Low | Type checker |
+| [lodash.clonedeep](https://lodash.com/) | Minor | Low | Clone deep Objects |
+| [lodash.get](https://lodash.com/) | Minor | Low | Get a value |
+| [lodash.set](https://lodash.com/) | Minor | Low | Set a value |
+| [node-watch](https://github.com/yuanchuan/node-watch#readme) | Minor | Medium | Watch files update on the system |
+| [zen-observable](https://github.com/zenparsing/zen-observable) | Minor | Low | Observable Implementation |
+
 ## Contributions Guidelines
 TBC
 
