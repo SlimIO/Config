@@ -61,7 +61,7 @@
     "@types/lodash.set": "^4.3.6",
     "@types/zen-observable": "^0.8.0",
     "ava": "^1.4.1",
-    "conventional-changelog-cli": "^2.0.12",
+    "conventional-changelog-cli": "^2.0.17",
     "eslint": "^5.16.0",
     "husky": "^2.0.0",
     "nyc": "^13.3.0",
