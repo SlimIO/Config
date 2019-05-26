@@ -64,6 +64,7 @@
     "conventional-changelog-cli": "^2.0.17",
     "eslint": "^5.16.0",
     "husky": "^2.0.0",
+    "jsdoc": "^3.6.2",
     "nyc": "^14.0.0",
     "pkg-ok": "^2.3.1",
     "typedoc": "^0.14.2"
