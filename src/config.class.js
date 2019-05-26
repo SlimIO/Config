@@ -44,7 +44,6 @@ const schema = Symbol("schema");
  * @version 0.1.0
  */
 class Config extends events {
-
     /**
      * @version 0.1.0
      *
@@ -606,7 +605,6 @@ class Config extends events {
         this.emit("close");
         this.configHasBeenRead = false;
     }
-
 }
 
 // Default JSON SPACE INDENTATION
