@@ -62,7 +62,7 @@
     "@types/zen-observable": "^0.8.0",
     "ava": "^1.4.1",
     "conventional-changelog-cli": "^2.0.17",
-    "eslint": "^5.16.0",
+    "eslint": "^6.0.0",
     "husky": "^2.0.0",
     "jsdoc": "^3.6.2",
     "nyc": "^14.0.0",
