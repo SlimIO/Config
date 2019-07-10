@@ -1,5 +1,4 @@
-/* eslint no-new: off */
-/* eslint max-len: off */
+"use strict";
 
 // Require Node.JS Dependencies
 const { writeFile, readFile, unlink, access } = require("fs").promises;

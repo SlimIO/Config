@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * @namespace utils
  */
@@ -9,9 +11,9 @@ const is = require("@slimio/is");
  * @exports utils/formatAjvErrors
  * @function formatAjvErrors
  * @memberof utils#
- * @desc format ajv errors
+ * @description format ajv errors
  * @param {ajv.ErrorObject[]} ajvErrors Array of ajv error Object
- * @returns {String}
+ * @returns {string}
  */
 function formatAjvErrors(ajvErrors) {
     if (!is.array(ajvErrors)) {
@@ -30,10 +32,10 @@ function formatAjvErrors(ajvErrors) {
  * @exports utils/limitObjectDepth
  * @function limitObjectDepth
  * @memberof utils#
- * @desc Limit an given object depth!
- * @param {!Object} obj obj
- * @param {Number=} [depth=0] depth
- * @returns {Object | Array}
+ * @description Limit an given object depth!
+ * @param {!object} obj obj
+ * @param {number} [depth=0] depth
+ * @returns {object | Array}
  */
 function limitObjectDepth(obj, depth = 0) {
     if (!is.plainObject(obj)) {

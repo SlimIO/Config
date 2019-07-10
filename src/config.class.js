@@ -1,3 +1,5 @@
+"use strict";
+
 // Require Node.JS core packages
 const { parse, join } = require("path");
 const { readFile, writeFile } = require("fs").promises;
@@ -23,20 +25,20 @@ const schema = Symbol("schema");
 /**
  * @class Config
  * @classdesc Reactive JSON Config loader class
- * @extends events
+ * @augments events
  * @template T
  *
- * @property {String} configFile Path to the configuration file
- * @property {String} schemaFile Path to the schema configuration file
+ * @property {string} configFile Path to the configuration file
+ * @property {string} schemaFile Path to the schema configuration file
  * @property {T} payload Configuration content
- * @property {Boolean} createOnNoEntry
- * @property {Boolean} autoReload
- * @property {Boolean} writeOnSet
- * @property {Boolean} configHasBeenRead Know if the configuration has been read at least one time
- * @property {Boolean} autoReloadActivated Know if the autoReload is Enabled or Disabled
+ * @property {boolean} createOnNoEntry
+ * @property {boolean} autoReload
+ * @property {boolean} writeOnSet
+ * @property {boolean} configHasBeenRead Know if the configuration has been read at least one time
+ * @property {boolean} autoReloadActivated Know if the autoReload is Enabled or Disabled
  * @property {Array<Array.<string, ZenObservable.SubscriptionObserver<any>>>} subscriptionObservers
- * @property {Number} reloadDelay delay before reloading the configuration file (in millisecond).
- * @property {Object} defaultSchema
+ * @property {number} reloadDelay delay before reloading the configuration file (in millisecond).
+ * @property {object} defaultSchema
  *
  * @event reload
  *
@@ -47,14 +49,14 @@ class Config extends events {
     /**
      * @version 0.1.0
      *
-     * @constructor
-     * @param {!String} configFilePath Absolute path to the configuration file
-     * @param {Object} [options={}] Config options
-     * @param {Boolean=} [options.createOnNoEntry=false] Create the configuration file when no entry are detected
-     * @param {Boolean=} [options.autoReload=false] Enable/Disable hot reload of the configuration file.
-     * @param {Boolean=} [options.writeOnSet=false] Write configuration on the disk after a set action
-     * @param {Object=} options.defaultSchema Optional default Schema
-     * @param {Number=} [options.reloadDelay=1000] Hot reload delay (in milliseconds)
+     * @class
+     * @param {!string} configFilePath Absolute path to the configuration file
+     * @param {object} [options={}] Config options
+     * @param {boolean} [options.createOnNoEntry=false] Create the configuration file when no entry are detected
+     * @param {boolean} [options.autoReload=false] Enable/Disable hot reload of the configuration file.
+     * @param {boolean} [options.writeOnSet=false] Write configuration on the disk after a set action
+     * @param {object} options.defaultSchema Optional default Schema
+     * @param {number} [options.reloadDelay=1000] Hot reload delay (in milliseconds)
      *
      * @throws {TypeError}
      * @throws {Error}
@@ -112,8 +114,9 @@ class Config extends events {
      *
      * @public
      * @memberof Config#
-     * @member {Object} payload
-     * @desc Get a payload Object clone (or null if the configuration has not been read yet)
+     * @member {object} payload
+     * @description Get a payload Object clone (or null if the configuration has not been read yet)
+     * @returns {object}
      *
      * @example
      * const cfg = new Config("./path/to/config.json");
@@ -130,9 +133,9 @@ class Config extends events {
      *
      * @public
      * @memberof Config#
-     * @member {Object} payload
+     * @member {object} payload
      * @param {!T} newPayload Newest payload to setup
-     * @desc Set a new payload Object
+     * @description Set a new payload Object
      *
      * @throws {Error}
      * @throws {TypeError}
@@ -178,11 +181,11 @@ class Config extends events {
      *
      * @public
      * @async
-     * @method read
-     * @desc Read the configuration file (And optionaly apply a default payload value if the file doesn't exist)
+     * @function read
+     * @description Read the configuration file (And optionaly apply a default payload value if the file doesn't exist)
      * @memberof Config#
-     * @param {T=} defaultPayload Optional default payload (if the file doesn't exist on the disk).
-     * @return {Promise<this>}
+     * @param {T} [defaultPayload] Optional default payload (if the file doesn't exist on the disk).
+     * @returns {Promise<this>}
      *
      * @example
      * const myConfig = new Config("./path/to/config.json", {
@@ -205,7 +208,7 @@ class Config extends events {
 
         /** @type {T} */
         let JSONConfig;
-        /** @type {Object} */
+        /** @type {object} */
         let JSONSchema;
         let writeOnDisk = false;
 
@@ -295,10 +298,10 @@ class Config extends events {
      * @version 0.1.0
      *
      * @public
-     * @method setupAutoReload
-     * @desc Setup configuration autoReload
+     * @function setupAutoReload
+     * @description Setup configuration autoReload
      * @memberof Config#
-     * @return {Boolean}
+     * @returns {boolean}
      *
      * @fires watcherInitialized
      * @fires reload
@@ -345,12 +348,12 @@ class Config extends events {
      *
      * @public
      * @template H
-     * @method get
-     * @desc Get a given field of the configuration
-     * @param {!String} fieldPath Path to the field (separated with dot)
-     * @param {Number=} [depth=Infinity] Payload depth!
+     * @function get
+     * @description Get a given field of the configuration
+     * @param {!string} fieldPath Path to the field (separated with dot)
+     * @param {number} [depth=Infinity] Payload depth!
      * @memberof Config#
-     * @return {H}
+     * @returns {H}
      *
      * @throws {Error}
      * @throws {TypeError}
@@ -389,12 +392,12 @@ class Config extends events {
      *
      * @public
      * @template H
-     * @method observableOf
-     * @desc Observe a given configuration key with an Observable object!
-     * @param {!String} fieldPath Path to the field (separated with dot)
-     * @param {!Number} [depth=Infinity] Retrieved value depth!
+     * @function observableOf
+     * @description Observe a given configuration key with an Observable object!
+     * @param {!string} fieldPath Path to the field (separated with dot)
+     * @param {!number} [depth=Infinity] Retrieved value depth!
      * @memberof Config#
-     * @return {ZenObservable.ObservableLike<H>}
+     * @returns {ZenObservable.ObservableLike<H>}
      *
      * @example
      * const myConfig = new Config("./config.json", {
@@ -429,6 +432,7 @@ class Config extends events {
 
         /**
          * Retrieve the field value first
+         *
          * @type {H}
          */
         const fieldValue = this.get(fieldPath, depth);
@@ -445,12 +449,12 @@ class Config extends events {
      *
      * @public
      * @template H
-     * @method set
-     * @desc Set a field in the configuration
+     * @function set
+     * @description Set a field in the configuration
      * @memberof Config#
-     * @param {!String} fieldPath Path to the field (separated with dot)
+     * @param {!string} fieldPath Path to the field (separated with dot)
      * @param {!H} fieldValue Field value
-     * @return {this}
+     * @returns {this}
      *
      * @throws {Error}
      * @throws {TypeError}
@@ -497,8 +501,8 @@ class Config extends events {
      * @version 0.1.0
      *
      * @public
-     * @method writeOnDisk
-     * @desc Write the configuration on the Disk
+     * @function writeOnDisk
+     * @description Write the configuration on the Disk
      * @memberof Config#
      * @returns {Promise<void>}
      *
@@ -530,8 +534,8 @@ class Config extends events {
      * @version 0.5.0
      *
      * @public
-     * @method lazyWriteOnDisk
-     * @desc lazy Write Configuration (write the configuration at the next loop iteration)
+     * @function lazyWriteOnDisk
+     * @description lazy Write Configuration (write the configuration at the next loop iteration)
      * @memberof Config#
      * @returns {void}
      *
@@ -566,8 +570,8 @@ class Config extends events {
      * @version 0.1.0
      *
      * @public
-     * @method close
-     * @desc Close (and write on disk) the configuration (it will close the watcher and clean all active observers).
+     * @function close
+     * @description Close (and write on disk) the configuration (it will close the watcher and clean all active observers).
      * @memberof Config#
      * @returns {Promise<void>}
      *
