@@ -9,8 +9,7 @@
     "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
     "coverage": "nyc npm test",
     "version": "conventional-changelog -i CHANGELOG.md -s",
-    "report": "nyc report --reporter=html",
-    "typedoc": "typedoc --out docs --name 'Config' --mode file --includeDeclarations --excludeExternals --hideGenerator --excludePrivate index.d.ts"
+    "report": "nyc report --reporter=html"
   },
   "repository": {
     "type": "git",
@@ -62,12 +61,10 @@
     "@types/zen-observable": "^0.8.0",
     "ava": "^2.2.0",
     "conventional-changelog-cli": "^2.0.21",
-    "eslint": "^6.0.1",
     "husky": "^3.0.0",
     "jsdoc": "^3.6.2",
     "nyc": "^14.1.1",
-    "pkg-ok": "^2.3.1",
-    "typedoc": "^0.14.2"
+    "pkg-ok": "^2.3.1"
   },
   "dependencies": {
     "@slimio/is": "^1.5.1",
