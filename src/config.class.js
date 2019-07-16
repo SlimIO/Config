@@ -225,6 +225,7 @@ class Config extends events {
         }
         catch (err) {
             // If NodeJS Code is different from "ENOENTRY", then throw Error (only if createOnNoEntry is equal to false)
+            // eslint-disable-next-line
             if (!this.createOnNoEntry || Reflect.has(err, "code") && err.code !== "ENOENT") {
                 throw err;
             }

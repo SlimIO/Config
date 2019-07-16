@@ -1,6 +1,3 @@
 {
-    "extends": "@slimio/eslint-config",
-    "rules": {
-        "no-mixed-operators": "warn"
-    }
+    "extends": "@slimio/eslint-config"
 }
