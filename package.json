@@ -1,6 +1,6 @@
 {
   "name": "@slimio/config",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "SlimIO Reactive JSON Config loaded",
   "main": "index.js",
   "scripts": {
