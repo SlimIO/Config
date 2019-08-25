@@ -17,7 +17,7 @@ SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core
 - Safe with [JSON Schema](https://json-schema.org/) validation
 
 ## Requirements
-Node.js version 10 and upper are required to run this project. **We do not provide support** for previous versions.
+[Node.js](https://nodejs.org/en/) version 10 and upper are required to run this project. **We do not provide support** for previous versions.
 
 ## Getting Started
 
