@@ -92,6 +92,7 @@ avaTest("Constructor options are applied as default properties", async(assert) =
     assert.true(config.autoReload);
     assert.true(config.writeOnSet);
     assert.is(config.reloadDelay, 700);
+    assert.false(config.toml);
 });
 
 avaTest("Update/Set multiple payload values", async(assert) => {
@@ -258,7 +259,7 @@ avaTest("Constructor throw error 'options should be instanceof Object prototype'
 });
 
 avaTest("Constructor throw error 'defaultSchema should be instanceof Object prototype'", (assert) => {
-    const error = assert.throws(() => {
+    assert.throws(() => {
         new Config("./test.json", { defaultSchema: 150 });
     }, { instanceOf: Error, message: "Config.constructor->options defaultSchema should be instanceof Object prototype" });
 });
@@ -705,4 +706,17 @@ avaTest("Test config as a SlimIO Core Mirror", async(assert) => {
     });
 
     await config.close();
+});
+
+avaTest("Load a TOML configuration", async(assert) => {
+    const config = new Config(join(__dirname, "config.toml"));
+    try {
+        await config.read();
+        const foo = config.get("foo");
+
+        assert.is(foo, "world");
+    }
+    finally {
+        await config.close();
+    }
 });
