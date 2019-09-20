@@ -14,11 +14,12 @@ const get = require("lodash.get");
 const clonedeep = require("lodash.clonedeep");
 const set = require("lodash.set");
 const Observable = require("zen-observable");
+const toml = require("@iarna/toml");
 
 // Require Internal dependencie(s)
 const { formatAjvErrors, limitObjectDepth } = require("./utils");
 
-// Private Config Accessors
+// SYMBOLS
 const payload = Symbol("payload");
 const schema = Symbol("schema");
 
@@ -81,8 +82,8 @@ class Config extends events {
 
         // Parse file and get the extension, name, dirname etc...
         const { dir, name, ext } = parse(configFilePath);
-        if (ext !== ".json") {
-            throw new Error("Config.constructor->configFilePath - file extension should be .json");
+        if (!Config.SUPPORTED_EXT.has(ext)) {
+            throw new Error("Config.constructor->configFilePath - file extension should be .json or .toml");
         }
         this.configFile = configFilePath;
         this.schemaFile = `${join(dir, name)}.schema.json`;
@@ -95,6 +96,7 @@ class Config extends events {
         this.autoReloadActivated = false;
         this.reloadDelay = is.number(options.reloadDelay) ? options.reloadDelay : 500;
         this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
+        this.toml = ext === ".toml";
         this.configHasBeenRead = false;
 
         /** @type {Array<Array<string, ZenObservable.SubscriptionObserver<any>>>} */
@@ -221,7 +223,7 @@ class Config extends events {
         // If he doesn't exist we replace it by the defaultPayload or the precedent loaded payload
         try {
             const str = await readFile(this.configFile, { encoding: "utf8" });
-            JSONConfig = JSON.parse(str);
+            JSONConfig = this.toml ? toml.parse(str) : JSON.parse(str);
         }
         catch (err) {
             // If NodeJS Code is different from "ENOENTRY", then throw Error (only if createOnNoEntry is equal to false)
@@ -522,7 +524,8 @@ class Config extends events {
             throw new Error("Config.writeOnDisk - Cannot write unreaded configuration on the disk");
         }
 
-        await writeFile(this.configFile, JSON.stringify(this[payload], null, Config.STRINGIFY_SPACE));
+        const data = this.toml ? toml.stringify(this[payload]) : JSON.stringify(this[payload], null, Config.STRINGIFY_SPACE);
+        await writeFile(this.configFile, data);
 
         /**
          * @event configWrited
@@ -612,6 +615,9 @@ class Config extends events {
     }
 }
 
+// Supported EXTENSION in the constructor
+Config.SUPPORTED_EXT = new Set([".json", ".toml"]);
+
 // Default JSON SPACE INDENTATION
 Config.STRINGIFY_SPACE = 4;
 
@@ -622,4 +628,5 @@ Config.DEFAULTSchema = {
 };
 
 // Export class
+Object.preventExtensions(Config);
 module.exports = Config;

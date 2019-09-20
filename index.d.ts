@@ -22,6 +22,8 @@ declare class Config<T> extends events.EventEmitter {
 
     // Static properties
     static DEFAULTSchema: object;
+    static STRINGIFY_SPACE: number;
+    static SUPPORTED_EXT: Set<string>;
 
     // Methods
     public read(defaultPayload?: T): Promise<this>;

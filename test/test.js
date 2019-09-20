@@ -248,7 +248,7 @@ avaTest("Constructor throw error 'configFilePath should be typeof <string>'", (a
 avaTest("Constructor throw error 'configFilePath - file extension should be .json'", (assert) => {
     assert.throws(() => {
         new Config("test.txt");
-    }, { instanceOf: Error, message: "Config.constructor->configFilePath - file extension should be .json" });
+    }, { instanceOf: Error, message: "Config.constructor->configFilePath - file extension should be .json or .toml" });
 });
 
 avaTest("Constructor throw error 'options should be instanceof Object prototype'", (assert) => {

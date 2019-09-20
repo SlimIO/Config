@@ -16,6 +16,7 @@ SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core
 - Hot-reloading of configuration
 - Reactive with observable key(s)
 - Safe with [JSON Schema](https://json-schema.org/) validation
+- Support [TOML](https://github.com/toml-lang/toml) as input (enable the parser when the file extension end with **.toml**)
 
 ## Requirements
 [Node.js](https://nodejs.org/en/) version 10 and upper are required to run this project. **We do not provide support** for previous versions.
@@ -244,17 +245,17 @@ The default value is the following Object:
 </details>
 
 ## Dependencies
-This project is covered by the SlimIO security policy and undergoes regular security audits.
 
-| Name | Refactoring | Security Risk | Usage |
-| --- | --- | --- | --- |
-| [ajv](https://github.com/epoberezkin/ajv) | ⚠️ Major | Medium | Validate JSON schema. |
-| [@slimio/is](https://github.com/SlimIO/is#readme) | Minor | Low | Type checker |
-| [lodash.clonedeep](https://lodash.com/) | Minor | Low | Clone deep Objects |
-| [lodash.get](https://lodash.com/) | Minor | Low | Get a value |
-| [lodash.set](https://lodash.com/) | Minor | Low | Set a value |
-| [node-watch](https://github.com/yuanchuan/node-watch#readme) | Minor | Medium | Watch files update on the system |
-| [zen-observable](https://github.com/zenparsing/zen-observable) | Minor | Low | Observable Implementation |
+|Name|Refactoring|Security Risk|Usage|
+|---|---|---|---|
+|[@iarna/toml](https://github.com/iarna/iarna-toml#readme)|Minor|Low|Better TOML parsing and stringifying all in that familiar JSON interface.|
+|[@slimio/is](https://github.com/SlimIO/is)|Minor|Low|JavaScript Type checker|
+|[ajv](https://github.com/epoberezkin/ajv)|Minor|High|The fastest JSON Schema Validator|
+|[lodash.clonedeep](https://github.com/lodash/lodash)|Minor|Low|Clone deep an Object|
+|[lodash.get](https://github.com/lodash/lodash)|Minor|Low|Get deep a value|
+|[lodash.set](https://github.com/lodash/lodash)|Minor|Low|Set deep a value|
+|[node-watch](https://github.com/yuanchuan/node-watch#readme)|Minor|Low|A wrapper and enhancements for fs.watch|
+|[zen-observable](https://github.com/zenparsing/zen-observable)|Minor|Low|ECMAScript Observable implementation|
 
 ## Contributions Guidelines
 TBC
