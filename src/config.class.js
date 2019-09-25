@@ -226,9 +226,11 @@ class Config extends events {
             JSONConfig = this.toml ? toml.parse(str) : JSON.parse(str);
         }
         catch (err) {
+            const isSyntaxError = err.name === "SyntaxError" || err.name === "TomlError";
+
             // If NodeJS Code is different from "ENOENTRY", then throw Error (only if createOnNoEntry is equal to false)
             // eslint-disable-next-line
-            if (!this.createOnNoEntry || Reflect.has(err, "code") && err.code !== "ENOENT") {
+            if (isSyntaxError || !this.createOnNoEntry || Reflect.has(err, "code") && err.code !== "ENOENT") {
                 throw err;
             }
 
