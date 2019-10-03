@@ -719,3 +719,17 @@ avaTest("Load a TOML configuration", async(assert) => {
         await config.close();
     }
 });
+
+avaTest("Read a JSON with a SyntaxError must throw when .read() is triggered", async(assert) => {
+    assert.plan(1);
+
+    const config = new Config(join(__dirname, "syntaxerror.json"), {
+        createOnNoEntry: true
+    });
+    try {
+        await config.read();
+    }
+    catch (error) {
+        assert.is(error.name, "SyntaxError");
+    }
+});
