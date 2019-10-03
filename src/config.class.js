@@ -594,14 +594,15 @@ class Config extends events {
             throw new Error("Config.close - Cannot close unreaded configuration");
         }
 
-        // Write the Configuration on the disk to be safe
-        await this.writeOnDisk();
-
-        // Close sys hook watcher
+        // Close watchers before writing on disk
         if (this.autoReloadActivated) {
             this.watcher.close();
             this.autoReloadActivated = false;
         }
+
+        // Write the Configuration on the disk to be safe
+        await this.writeOnDisk();
+        this.configHasBeenRead = false;
 
         // Complete all observers
         for (const [fieldPath, subscriptionObservers] of this.subscriptionObservers) {
@@ -613,7 +614,6 @@ class Config extends events {
         clearInterval(this.cleanupTimeout);
 
         this.emit("close");
-        this.configHasBeenRead = false;
     }
 }
 

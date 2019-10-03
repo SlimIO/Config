@@ -615,7 +615,6 @@ avaTest("Closed configuration should not be hot reloaded!", async(assert) => {
 
     await config.read();
     config.set("foo", "world!");
-    await config.writeOnDisk();
 
     await config.close();
     await new Promise((resolve) => setTimeout(resolve, 200));
