@@ -19,7 +19,7 @@ SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core
 - Support [TOML](https://github.com/toml-lang/toml) as input (enable the parser when the file extension end with **.toml**)
 
 ## Requirements
-[Node.js](https://nodejs.org/en/) version 10 and upper are required to run this project. **We do not provide support** for previous versions.
+[Node.js](https://nodejs.org/en/) version 12 and upper are required to run this project. **We do not provide support** for previous versions.
 
 ## Getting Started
 
