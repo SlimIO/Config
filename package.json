@@ -65,7 +65,7 @@
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.set": "^4.3.6",
     "@types/zen-observable": "^0.8.0",
-    "ava": "^2.4.0",
+    "ava": "^3.0.0",
     "conventional-changelog-cli": "^2.0.23",
     "cross-env": "^6.0.3",
     "eslint": "^6.5.1",
