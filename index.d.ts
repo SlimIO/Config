@@ -24,6 +24,7 @@ declare class Config<T> extends events.EventEmitter {
     static DEFAULTSchema: object;
     static STRINGIFY_SPACE: number;
     static SUPPORTED_EXT: Set<string>;
+    static DEFAULT_EXTENSION: ".json" | ".toml";
 
     // Methods
     public read(defaultPayload?: T): Promise<this>;

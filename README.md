@@ -230,10 +230,10 @@ Following properties are **static** members of **Config** class.
 The `STRINGIFY_SPACE` property allow you to redine the espace used internaly for `JSON.stringify` method. The default value is **4**.
 </details>
 
-<details><summary>DEFAULT_SCHEMA</summary>
+<details><summary>DEFAULTSchema</summary>
 <br />
 
-The `DEFAULT_SCHEMA` property allow you to redefine the default schema that should be applied if no schema is provided when constructor is triggered!
+The `DEFAULTSchema` property allow you to redefine the default schema that should be applied if no schema is provided when constructor is triggered!
 
 The default value is the following Object:
 ```js
@@ -242,6 +242,13 @@ The default value is the following Object:
     additionalProperties: true
 }
 ```
+</details>
+
+<details><summary>DEFAULT_EXTENSION</summary>
+<br />
+
+The `DEFAULT_EXTENSION` property allow you to redefine the default extension when there is no extension detected in the constructor filePath. The extension can be either `.json` or `.toml`.
+
 </details>
 
 ## Dependencies

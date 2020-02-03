@@ -2,7 +2,7 @@
 
 // Require Node.JS core packages
 const { parse, join } = require("path");
-const { readFile, writeFile } = require("fs").promises;
+const { existsSync, promises: { readFile, writeFile } } = require("fs");
 const events = require("events");
 
 // Require Third-party NPM package(s)
@@ -27,7 +27,6 @@ const schema = Symbol("schema");
  * @class Config
  * @classdesc Reactive JSON Config loader class
  * @augments events
- * @template T
  *
  * @property {string} configFile Path to the configuration file
  * @property {string} schemaFile Path to the schema configuration file
@@ -82,7 +81,12 @@ class Config extends events {
 
         // Parse file and get the extension, name, dirname etc...
         const { dir, name, ext } = parse(configFilePath);
-        if (!Config.SUPPORTED_EXT.has(ext)) {
+        let defaultExtension = ext;
+        if (ext === "") {
+            defaultExtension = existsSync(`${configFilePath}.toml`) ? ".toml" : Config.DEFAULT_EXTENSION;
+        }
+
+        if (!Config.SUPPORTED_EXT.has(defaultExtension)) {
             throw new Error("Config.constructor->configFilePath - file extension should be .json or .toml");
         }
         this.configFile = configFilePath;
@@ -96,7 +100,7 @@ class Config extends events {
         this.autoReloadActivated = false;
         this.reloadDelay = is.number(options.reloadDelay) ? options.reloadDelay : 500;
         this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
-        this.toml = ext === ".toml";
+        this.toml = defaultExtension === ".toml";
         this.configHasBeenRead = false;
 
         /** @type {Array<Array<string, ZenObservable.SubscriptionObserver<any>>>} */
@@ -352,7 +356,6 @@ class Config extends events {
      * @version 0.1.0
      *
      * @public
-     * @template H
      * @function get
      * @description Get a given field of the configuration
      * @param {!string} fieldPath Path to the field (separated with dot)
@@ -396,7 +399,6 @@ class Config extends events {
      * @version 0.1.0
      *
      * @public
-     * @template H
      * @function observableOf
      * @description Observe a given configuration key with an Observable object!
      * @param {!string} fieldPath Path to the field (separated with dot)
@@ -453,12 +455,11 @@ class Config extends events {
      * @version 0.1.0
      *
      * @public
-     * @template H
      * @function set
      * @description Set a field in the configuration
      * @memberof Config#
      * @param {!string} fieldPath Path to the field (separated with dot)
-     * @param {!H} fieldValue Field value
+     * @param {!any} fieldValue Field value
      * @returns {this}
      *
      * @throws {Error}
@@ -622,6 +623,9 @@ Config.SUPPORTED_EXT = new Set([".json", ".toml"]);
 
 // Default JSON SPACE INDENTATION
 Config.STRINGIFY_SPACE = 4;
+
+// Default Extension loaded
+Config.DEFAULT_EXTENSION = ".json";
 
 // Default JSON Schema!
 Config.DEFAULTSchema = {
