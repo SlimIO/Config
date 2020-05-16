@@ -7,7 +7,6 @@
 ![size](https://img.shields.io/bundlephobia/min/@slimio/config.svg?style=flat)
 [![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Config/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Config?targetFile=package.json)
 [![Build Status](https://travis-ci.com/SlimIO/Config.svg?branch=master)](https://travis-ci.com/SlimIO/Config)
-[![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Config.svg)](https://greenkeeper.io/)
 
 SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core and addons to safely hot reload configuration upon [JSON Schema](https://json-schema.org/).
 
