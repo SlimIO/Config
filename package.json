@@ -9,7 +9,9 @@
     "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
     "coverage": "nyc npm test",
     "version": "conventional-changelog -i CHANGELOG.md -s",
-    "report": "nyc report --reporter=html"
+    "report": "nyc report --reporter=html",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -82,6 +84,8 @@
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "node-watch": "^0.6.4",
-    "zen-observable": "^0.8.15"
-  }
+    "zen-observable": "^0.8.15",
+    "snyk": "^1.321.0"
+  },
+  "snyk": true
 }
