@@ -226,7 +226,11 @@ class Config extends events {
         // Get and parse the JSON Configuration file (if exist, else it will throw ENOENT).
         // If he doesn't exist we replace it by the defaultPayload or the precedent loaded payload
         try {
-            const str = await readFile(this.configFile, { encoding: "utf8" });
+            let str = await readFile(this.configFile, { encoding: "utf8" });
+            if (!this.toml && str.trim() === "") {
+                str = "{}";
+                writeOnDisk = true;
+            }
             JSONConfig = this.toml ? toml.parse(str) : JSON.parse(str);
         }
         catch (err) {
