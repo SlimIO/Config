@@ -56,8 +56,8 @@
   },
   "homepage": "https://github.com/SlimIO/Config#readme",
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
+    "@commitlint/cli": "^9.0.1",
+    "@commitlint/config-conventional": "^9.0.1",
     "@escommunity/minami": "^1.0.0",
     "@slimio/eslint-config": "^4.1.0",
     "@slimio/psp": "^0.11.1",
@@ -65,14 +65,14 @@
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.set": "^4.3.6",
     "@types/zen-observable": "^0.8.0",
-    "ava": "^3.8.2",
+    "ava": "^3.10.1",
     "codecov": "^3.7.0",
     "conventional-changelog-cli": "^2.0.34",
     "cross-env": "^7.0.2",
-    "eslint": "^7.0.0",
+    "eslint": "^7.4.0",
     "husky": "^4.2.5",
     "jsdoc": "^3.6.4",
-    "nyc": "^15.0.1",
+    "nyc": "^15.1.0",
     "pkg-ok": "^2.3.1"
   },
   "dependencies": {
