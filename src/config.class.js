@@ -89,7 +89,7 @@ class Config extends events {
         if (!Config.SUPPORTED_EXT.has(defaultExtension)) {
             throw new Error("Config.constructor->configFilePath - file extension should be .json or .toml");
         }
-        this.configFile = configFilePath;
+        this.configFile = ext === "" ? `${configFilePath}${defaultExtension}` : configFilePath;
         this.schemaFile = `${join(dir, name)}.schema.json`;
 
         // Assign default class values
