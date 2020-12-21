@@ -294,7 +294,7 @@ avaTest("Set a new payload that doesn't match the current Schema", async(test) =
         config.payload = { foo: 10 };
     }, {
         instanceOf: Error,
-        message: "Config.payload - Failed to validate new configuration, err => property .foo should be string\n"
+        message: "Config.payload - Failed to validate new configuration, err => property /foo should be string\n"
     });
 
     await config.close();
@@ -366,7 +366,7 @@ avaTest("Read a corrupted json", async(assert) => {
 
     await assert.throwsAsync(config.read(), {
         instanceOf: Error,
-        message: "Config.payload - Failed to validate new configuration, err => property .foo should be string\n"
+        message: "Config.payload - Failed to validate new configuration, err => property /foo should be string\n"
     });
     assert.deepEqual(config.payload, Object.create(null));
     assert.is(config.configHasBeenRead, false);
@@ -633,7 +633,7 @@ avaTest("Config set invalid value", async(assert) => {
         config.set("foo", 10);
     }, {
         instanceOf: Error,
-        message: "Config.payload - Failed to validate new configuration, err => property .foo should be string\n"
+        message: "Config.payload - Failed to validate new configuration, err => property /foo should be string\n"
     });
 });
 

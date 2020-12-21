@@ -8,8 +8,8 @@ const events = require("events");
 // Require Third-party NPM package(s)
 const watcher = require("node-watch");
 const is = require("@slimio/is");
-const _ajv = require("ajv");
-const ajv = new _ajv({ useDefaults: "shared" });
+const Ajv = require("ajv").default;
+const ajv = new Ajv({ useDefaults: "shared" });
 const get = require("lodash.get");
 const clonedeep = require("lodash.clonedeep");
 const set = require("lodash.set");
