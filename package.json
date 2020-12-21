@@ -82,7 +82,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
-    "node-watch": "^0.6.4",
+    "node-watch": "^0.7.1",
     "zen-observable": "^0.8.15"
   }
 }
