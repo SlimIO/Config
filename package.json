@@ -78,7 +78,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@slimio/is": "^1.5.1",
-    "ajv": "^6.12.3",
+    "ajv": "^7.0.2",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
