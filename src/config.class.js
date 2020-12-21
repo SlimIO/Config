@@ -276,6 +276,7 @@ class Config extends events {
                     }
                 }
             }, 1000);
+            this.cleanupTimeout.unref();
         }
 
         // Setup config state has "read" true
