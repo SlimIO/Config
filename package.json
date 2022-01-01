@@ -70,7 +70,7 @@
     "conventional-changelog-cli": "^2.2.2",
     "cross-env": "^7.0.3",
     "eslint": "^8.6.0",
-    "husky": "^4.3.6",
+    "husky": "^4.3.8",
     "jsdoc": "^3.6.7",
     "nyc": "^15.1.0",
     "pkg-ok": "^2.3.1"
