@@ -81,15 +81,24 @@ class Config extends events {
 
         // Parse file and get the extension, name, dirname etc...
         const { dir, name, ext } = parse(configFilePath);
-        let defaultExtension = ext;
-        if (ext === "") {
-            defaultExtension = existsSync(`${configFilePath}.toml`) ? ".toml" : Config.DEFAULT_EXTENSION;
-        }
+        this.startWithDot = name.startsWith(".");
 
-        if (!Config.SUPPORTED_EXT.has(defaultExtension)) {
-            throw new Error("Config.constructor->configFilePath - file extension should be .json or .toml");
+        if (this.startWithDot) {
+            this.configFile = configFilePath;
+            this.toml = false;
         }
-        this.configFile = ext === "" ? `${configFilePath}${defaultExtension}` : configFilePath;
+        else {
+            let defaultExtension = ext;
+            if (ext === "") {
+                defaultExtension = existsSync(`${configFilePath}.toml`) ? ".toml" : Config.DEFAULT_EXTENSION;
+            }
+
+            if (!Config.SUPPORTED_EXT.has(defaultExtension)) {
+                throw new Error("Config.constructor->configFilePath - file extension should be .json or .toml");
+            }
+            this.configFile = ext === "" ? `${configFilePath}${defaultExtension}` : configFilePath;
+            this.toml = defaultExtension === ".toml";
+        }
         this.schemaFile = `${join(dir, name)}.schema.json`;
 
         // Assign default class values
@@ -100,7 +109,6 @@ class Config extends events {
         this.autoReloadActivated = false;
         this.reloadDelay = is.number(options.reloadDelay) ? options.reloadDelay : 500;
         this.writeOnSet = is.boolean(options.writeOnSet) ? options.writeOnSet : false;
-        this.toml = defaultExtension === ".toml";
         this.configHasBeenRead = false;
 
         /** @type {Array<Array<string, ZenObservable.SubscriptionObserver<any>>>} */

@@ -16,6 +16,7 @@ SlimIO - Reactive JSON Configuration loader. This package is used in SlimIO core
 - Reactive with observable key(s)
 - Safe with [JSON Schema](https://json-schema.org/) validation
 - Support [TOML](https://github.com/toml-lang/toml) as input (enable the parser when the file extension end with **.toml**)
+- Read configuration with no extension that start with a dot (like `.nodesecurerc` for example).
 
 ## Requirements
 [Node.js](https://nodejs.org/en/) version 12 and upper are required to run this project. **We do not provide support** for previous versions.

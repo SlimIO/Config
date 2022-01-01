@@ -720,6 +720,19 @@ avaTest("Load a TOML configuration", async(assert) => {
     }
 });
 
+avaTest("Load a configuration starting with a dot", async(assert) => {
+    const config = new Config(join(__dirname, ".dotconfig"));
+    try {
+        await config.read();
+        const foo = config.get("foo");
+
+        assert.is(foo, "world!");
+    }
+    finally {
+        await config.close();
+    }
+});
+
 avaTest("Read a JSON with a SyntaxError must throw when .read() is triggered", async(assert) => {
     assert.plan(1);
 

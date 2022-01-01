@@ -1,4 +1,3 @@
-/// <reference types="@types/node" />
 /// <reference types="@types/zen-observable" />
 
 import * as events from "events";
