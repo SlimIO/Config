@@ -180,7 +180,7 @@ class Config extends events {
         const tempPayload = clonedeep(newPayload);
         if (this[schema](tempPayload) === false) {
             const errors = formatAjvErrors(this[schema].errors);
-            const msg = `Config.payload - Failed to validate new configuration, err => ${errors}`;
+            const msg = `Config.payload (setter) - AJV Validation failed with error(s) => ${errors}`;
             throw new Error(msg);
         }
 
