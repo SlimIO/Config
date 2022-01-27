@@ -1,3 +1,11 @@
+## <small>1.0.1 (2022-01-27)</small>
+
+* chore: changelog ([b80b547](https://github.com/SlimIO/Config/commit/b80b547))
+* chore: enhance AJV error message ([a0b2cd8](https://github.com/SlimIO/Config/commit/a0b2cd8))
+* fix(slimio): use same version ([72da62a](https://github.com/SlimIO/Config/commit/72da62a))
+
+
+
 ## 1.0.0 (2022-01-01)
 
 * feat: add CHANGELOG ([d2310b7](https://github.com/SlimIO/Config/commit/d2310b7))
