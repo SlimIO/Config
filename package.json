@@ -2,36 +2,24 @@
   "name": "@slimio/config",
   "version": "1.0.1",
   "description": "SlimIO Reactive JSON Config loaded",
-  "main": "index.js",
+  "main": "./index.js",
+  "exports": "./index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "prepublishOnly": "pkg-ok",
-    "test": "cross-env psp && nyc --reporter=lcov ava --verbose",
+    "test": "ava --verbose",
     "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
     "coverage": "codecov",
     "version": "conventional-changelog -i CHANGELOG.md -s",
-    "report": "nyc report --reporter=html"
+    "report": "c8 -r html npm test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SlimIO/Config.git"
   },
   "engines": {
-    "npm": ">=6.0.0",
-    "node": ">=12"
-  },
-  "nyc": {
-    "check-coverage": true,
-    "per-file": false,
-    "lines": 50,
-    "statements": 50,
-    "functions": 50,
-    "branches": 50
-  },
-  "husky": {
-    "hooks": {
-      "pre-push": "cross-env eslint index.js src/**.js && npm test",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
+    "npm": ">=7.0.0",
+    "node": ">=14"
   },
   "keywords": [
     "SlimIO",
@@ -56,23 +44,19 @@
   },
   "homepage": "https://github.com/SlimIO/Config#readme",
   "devDependencies": {
-    "@commitlint/cli": "^17.1.2",
-    "@commitlint/config-conventional": "^17.1.0",
     "@escommunity/minami": "^1.0.0",
     "@slimio/eslint-config": "^5.0.0",
-    "@slimio/psp": "^0.12.3",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/lodash.get": "^4.4.7",
     "@types/lodash.set": "^4.3.7",
     "@types/zen-observable": "^0.8.3",
     "ava": "^4.3.3",
+    "c8": "^7.12.0",
     "codecov": "^3.8.3",
     "conventional-changelog-cli": "^2.2.2",
     "cross-env": "^7.0.3",
     "eslint": "^8.23.0",
-    "husky": "^8.0.1",
     "jsdoc": "^3.6.11",
-    "nyc": "^15.1.0",
     "pkg-ok": "^3.0.0"
   },
   "dependencies": {
