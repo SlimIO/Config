@@ -1,3 +1,12 @@
+## 1.1.0 (2022-09-05)
+
+* refactor(package): remove useless packages and configs ([c52baa1](https://github.com/SlimIO/Config/commit/c52baa1))
+* chore: add changelog ([e9941fb](https://github.com/SlimIO/Config/commit/e9941fb))
+* chore: update dependencies and fix security issues ([cfc1cd4](https://github.com/SlimIO/Config/commit/cfc1cd4))
+* fix: manifest version ([83965f3](https://github.com/SlimIO/Config/commit/83965f3))
+
+
+
 ## <small>1.0.1 (2022-01-27)</small>
 
 * chore: changelog ([b80b547](https://github.com/SlimIO/Config/commit/b80b547))
