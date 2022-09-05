@@ -251,22 +251,6 @@ The `DEFAULT_EXTENSION` property allow you to redefine the default extension whe
 
 </details>
 
-## Dependencies
-
-|Name|Refactoring|Security Risk|Usage|
-|---|---|---|---|
-|[@iarna/toml](https://github.com/iarna/iarna-toml#readme)|Minor|Low|Better TOML parsing and stringifying all in that familiar JSON interface.|
-|[@slimio/is](https://github.com/SlimIO/is)|Minor|Low|JavaScript Type checker|
-|[ajv](https://github.com/epoberezkin/ajv)|Minor|High|The fastest JSON Schema Validator|
-|[lodash.clonedeep](https://github.com/lodash/lodash)|Minor|Low|Clone deep an Object|
-|[lodash.get](https://github.com/lodash/lodash)|Minor|Low|Get deep a value|
-|[lodash.set](https://github.com/lodash/lodash)|Minor|Low|Set deep a value|
-|[node-watch](https://github.com/yuanchuan/node-watch#readme)|Minor|Low|A wrapper and enhancements for fs.watch|
-|[zen-observable](https://github.com/zenparsing/zen-observable)|Minor|Low|ECMAScript Observable implementation|
-
-## Contributions Guidelines
-TBC
-
 ## License
 MIT
 
