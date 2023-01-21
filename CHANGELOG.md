@@ -1,3 +1,11 @@
+## 1.2.0 (2023-01-21)
+
+* chore: add CHANGELOG.md ([b3e0e67](https://github.com/SlimIO/Config/commit/b3e0e67))
+* chore: update dependencies ([73fb837](https://github.com/SlimIO/Config/commit/73fb837))
+* docs: remove old dependencies section ([33f0470](https://github.com/SlimIO/Config/commit/33f0470))
+
+
+
 ## 1.1.0 (2022-09-05)
 
 * refactor(package): remove useless packages and configs ([c52baa1](https://github.com/SlimIO/Config/commit/c52baa1))
